@@ -25,8 +25,16 @@ public class User {
         this.role = role;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getUsername() {
         return username;
+    }
+
+    public int getRole() {
+        return role;
     }
 
     public static ArrayList<User> fetchAll() throws SQLException {

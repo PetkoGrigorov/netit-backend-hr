@@ -164,4 +164,16 @@ public class Database {
         }
     }
 
+    public long getLastInsertedId() {
+        try {
+            ResultSet resultSet = this.dbStatement.getGeneratedKeys();
+            while(resultSet.next()) {
+                return resultSet.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Long.parseLong(null);
+    }
+
 }

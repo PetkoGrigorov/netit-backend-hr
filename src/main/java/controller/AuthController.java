@@ -4,6 +4,9 @@ import config.PageMap;
 import config.RouteMap;
 import framework.WebController;
 import framework.annotation.MVCRouteMethod;
+import framework.db.Database;
+import model.DetailsEmployee;
+import model.DetailsEmployer;
 import model.User;
 import model.system.Auth;
 
@@ -37,7 +40,16 @@ public class AuthController extends WebController {
             this.login(req, resp);
             return;
         }
-        setSession(req,"auth_user", Auth.getAuthenticatedUser().getUsername());
+        User authUser = Auth.getAuthenticatedUser();
+        String authUserName = null;
+        int userRole = authUser.getRole();
+        if (userRole == 3) {
+            authUserName = DetailsEmployer.fetchDetails(authUser.getId()).getCompanyName();
+        }
+        if (userRole == 4) {
+            authUserName = DetailsEmployee.fetchDetails(authUser.getId()).getFullName();
+        }
+        setSession(req,"auth_user", authUserName);
         redirect(resp, RouteMap.HOME);
         System.out.println("Execute auth/loginProcess");
     }
@@ -88,6 +100,27 @@ public class AuthController extends WebController {
             return;
         }
 
+        int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
+        System.out.println("Last Inserted Id: " + lastInsertedId);
+        String authUserName = null;
+
+        if (role == 3) {
+            String companyName = req.getParameter("company_name");
+            String branch = req.getParameter("branch");
+            String description = req.getParameter("description");
+            DetailsEmployer.create(lastInsertedId, companyName, branch, description);
+            authUserName = DetailsEmployer.fetchDetails(lastInsertedId).getCompanyName();
+        }
+
+        if (role == 4) {
+            String fullName = req.getParameter("full_name");
+            int age = Integer.parseInt(req.getParameter("age"));
+            String town = req.getParameter("town");
+            String education = req.getParameter("education");
+            DetailsEmployee.create(lastInsertedId, fullName, age, town, education);
+            authUserName = DetailsEmployee.fetchDetails(lastInsertedId).getFullName();
+        }
+
         Auth.authenticateUser(username, password);
         if (!Auth.isAuthenticated()) {
             User.undoCreate(username);
@@ -95,12 +128,7 @@ public class AuthController extends WebController {
             this.registration(req, resp);
             return;
         } else {
-            setSession(req,"auth_user", Auth.getAuthenticatedUser().getUsername());
-        }
-
-
-
-        if (role == 3) {
+            setSession(req,"auth_user", authUserName);
 
         }
 

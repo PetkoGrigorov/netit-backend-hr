@@ -37,6 +37,7 @@ ${message}
         }
 
         if (role.equals("4")) {
+            out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"full_name\" name=\"full_name\">");
             out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"age\" name=\"age\">");
             out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"town\" name=\"town\">");
             out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"education\" name=\"education\">");
