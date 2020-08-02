@@ -1,0 +1,61 @@
+#body{
+    background: khaki;
+}
+
+#header{
+    background: gray;
+    overflow: hidden;
+}
+
+#footer{
+    background: gray;
+    color: darkkhaki;
+    padding: 20px;
+}
+
+#logo{
+    float: left;
+    font-weight: bold;
+    font-size: 40px;
+    margin-left: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#logo > a{
+    text-decoration: none;
+    color: darkorange;
+}
+
+#logo > a:hover{
+    color: azure;
+}
+
+#message {
+    float: left;
+    color: chartreuse;
+    margin-top: 29px;
+    margin-left: 124px;
+}
+
+#menu{
+    float: right;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+ul > li{
+    display: inline-block;
+    margin-right: 5px;
+    margin-left: 5px;
+    color: azure;
+}
+
+ul > li> a{
+    color: azure;
+    text-decoration: none;
+}
+
+ul > li> a:hover{
+    color: darkorange;
+}
