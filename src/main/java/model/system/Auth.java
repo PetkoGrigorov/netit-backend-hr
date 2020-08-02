@@ -10,10 +10,14 @@ public class Auth {
 
     public static void authenticateUser(String username, String pass) {
         try {
-            authUser = User.fetchUser(username, pass);
+            Auth.authUser = User.fetchUser(username, pass);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void destroyUser() {
+        Auth.authUser = null;
     }
 
     public static boolean isAuthenticated() {

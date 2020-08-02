@@ -158,7 +158,7 @@ public class Database {
 
     public void execute() {
         try {
-            this.dbStatement.execute(this.queryBuilder);
+            this.dbStatement.execute(this.queryBuilder, Statement.RETURN_GENERATED_KEYS);
         } catch (SQLException e) {
             e.printStackTrace();
         }
