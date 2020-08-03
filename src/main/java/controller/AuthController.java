@@ -32,6 +32,8 @@ public class AuthController extends WebController {
 
     @MVCRouteMethod(path = "/auth/login", method = "POST")
     public void loginProcess(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute auth/loginProcess");
+
         String username = req.getParameter("user_name");
         String password = req.getParameter("user_pass");
         Auth.authenticateUser(username, password);
@@ -45,13 +47,18 @@ public class AuthController extends WebController {
         int userRole = authUser.getRole();
         if (userRole == 3) {
             authUserName = DetailsEmployer.fetchDetails(authUser.getId()).getCompanyName();
+            setSession(req,"auth_user", authUserName);
+            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
+            return;
         }
         if (userRole == 4) {
             authUserName = DetailsEmployee.fetchDetails(authUser.getId()).getFullName();
+            setSession(req,"auth_user", authUserName);
+            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
         }
-        setSession(req,"auth_user", authUserName);
-        redirect(resp, RouteMap.HOME);
-        System.out.println("Execute auth/loginProcess");
+//        setSession(req,"auth_user", authUserName);
+//        redirect(resp, RouteMap.HOME);
+
     }
 
     @MVCRouteMethod(path="/auth/logout", method="GET")
@@ -82,41 +89,78 @@ public class AuthController extends WebController {
 
     @MVCRouteMethod(path="/auth/registration", method="POST")
     public void registrationProcess(HttpServletRequest req, HttpServletResponse resp) throws SQLException {
+        System.out.println("Execute auth/registrationProcess");
+
         String username = req.getParameter("user_name");
         String password = req.getParameter("user_pass");
         String passwordRepeat = req.getParameter("user_pass_repeat");
         String email = req.getParameter("user_email");
+        if (username.equals("") || password.equals("") || email.equals("")) {
+            req.setAttribute("message", "Invalid credentials");
+            this.registration(req, resp);
+            return;
+        }
         int role = Integer.parseInt(getSession(req, "role").toString());
         if (!password.equals(passwordRepeat)) {
             req.setAttribute("message", "Passwords differ");
             this.registration(req, resp);
             return;
         }
-        if (User.isUnique("username", username) && User.isUnique("email", email)) {
-            User.create(username, password, email, role);
-        } else {
-            req.setAttribute("message", "Username or email exists in system");
-            this.registration(req, resp);
-            return;
-        }
 
-        int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
-        System.out.println("Last Inserted Id: " + lastInsertedId);
         String authUserName = null;
 
         if (role == 3) {
             String companyName = req.getParameter("company_name");
             String branch = req.getParameter("branch");
             String description = req.getParameter("description");
+            if (companyName.equals("") || branch.equals("") || description.equals("")) {
+                req.setAttribute("message", "Invalid credentials");
+                this.registration(req, resp);
+                return;
+            }
+            if (User.isUnique("username", username) && User.isUnique("email", email)) {
+                User.create(username, password, email, role);
+            } else {
+                req.setAttribute("message", "Username or email exists in system");
+                this.registration(req, resp);
+                return;
+            }
+
+            int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
+            System.out.println("Last Inserted Id: " + lastInsertedId);
             DetailsEmployer.create(lastInsertedId, companyName, branch, description);
             authUserName = DetailsEmployer.fetchDetails(lastInsertedId).getCompanyName();
         }
 
         if (role == 4) {
             String fullName = req.getParameter("full_name");
-            int age = Integer.parseInt(req.getParameter("age"));
+            int age = 0;
+            try {
+                age = Integer.parseInt(req.getParameter("age"));
+            } catch (Exception e) {
+                req.setAttribute("message", "Invalid age");
+                this.registration(req, resp);
+                return;
+            }
             String town = req.getParameter("town");
             String education = req.getParameter("education");
+            if (fullName.equals("") || town.equals("") || education.equals("")) {
+                req.setAttribute("message", "Invalid credentials");
+                this.registration(req, resp);
+                return;
+            }
+
+            if (User.isUnique("username", username) && User.isUnique("email", email)) {
+                User.create(username, password, email, role);
+            } else {
+                req.setAttribute("message", "Username or email exists in system");
+                this.registration(req, resp);
+                return;
+            }
+
+            int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
+            System.out.println("Last Inserted Id: " + lastInsertedId);
+
             DetailsEmployee.create(lastInsertedId, fullName, age, town, education);
             authUserName = DetailsEmployee.fetchDetails(lastInsertedId).getFullName();
         }
@@ -134,7 +178,6 @@ public class AuthController extends WebController {
 
         redirect(resp, RouteMap.HOME);
 
-        System.out.println("Execute auth/registrationProcess");
     }
 
 }

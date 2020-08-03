@@ -1,4 +1,6 @@
 import framework.annotation.MVCRouteMethod;
+import framework.annotation.RoleAccess;
+import model.system.Auth;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -43,7 +45,22 @@ public class FrontController extends HttpServlet {
             for (Method method: controllerMethods) {
                 if (method.isAnnotationPresent(MVCRouteMethod.class)) {
                     MVCRouteMethod methodAnnotation = method.getAnnotation(MVCRouteMethod.class);
+                    String path = req.getPathInfo();
                     if (methodAnnotation.path().equals(req.getPathInfo()) && methodAnnotation.method().equals(methodType)) {
+                        if (method.isAnnotationPresent(RoleAccess.class)) {
+                            RoleAccess annotation = method.getAnnotation(RoleAccess.class);
+                            if (!Auth.isAuthenticated()) {
+                                break;
+                            }
+                            int role = Auth.getAuthenticatedUser().getRole();
+                            int annoRole = annotation.role();
+                            if (annotation.role() == Auth.getAuthenticatedUser().getRole()) {
+                                String name = method.getName();
+                                controllerMethod = method;
+                                break;
+                            }
+                            continue;
+                        }
                         controllerMethod = method;
                         break;
                     }
@@ -51,9 +68,10 @@ public class FrontController extends HttpServlet {
             }
 
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            System.out.println("Controller Reference: " + controllerReference);
+            System.out.println("Controller Reference: " + controllerReference.getName());
             System.out.println("Controller Instance: " + controllerInstance);
-            System.out.println("Controller Method: " + controllerMethod);
+            String met = controllerMethod.getName();
+            System.out.println("Controller Method: " + controllerMethod.getName());
             System.out.println("------------------------------------------------------------");
 
             controllerMethod.invoke(controllerInstance, req, resp);

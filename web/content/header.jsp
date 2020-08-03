@@ -10,7 +10,7 @@
 
     <div id="header">
         <h1 id="logo">
-            <a href="index.jsp">Jobser</a>
+            <a href="/Jobser_war2/base/home/index">Jobser</a>
         </h1>
 
         <div id="message">
