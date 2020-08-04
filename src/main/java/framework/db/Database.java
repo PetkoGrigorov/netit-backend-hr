@@ -51,8 +51,29 @@ public class Database {
         return this;
     }
 
+    public Database selectComplex(HashMap<String, ArrayList<String>> collection) {
+        String query = "SELECT ";
+        String fromTablesString = " FROM ";
+        Set<Map.Entry<String, ArrayList<String>>> entrySet = collection.entrySet();
+        for (Map.Entry<String, ArrayList<String>> tableAndColumns : entrySet) {
+            String table = tableAndColumns.getKey();
+            fromTablesString += table + ", ";
+            ArrayList<String> columnList = tableAndColumns.getValue();
+            for (String column : columnList) {
+                query += table + "." + column + ", ";
+            }
+        }
+        this.queryBuilder = query.substring(0, (query.length() - 2)) + fromTablesString.substring(0, (fromTablesString.length() - 2));
+        return this;
+    }
+
     public Database where(String column, Condition condition, Object value) {
         this.queryBuilder += " WHERE " + column + " " + getCondition(condition) +  " " + valueForQueryBuilder(value, condition);
+        return this;
+    }
+
+    public Database whereColumns(String column1, Condition condition, String column2) {
+        this.queryBuilder += " WHERE " + column1 + " " + getCondition(condition) +  " " + column2;
         return this;
     }
 
@@ -61,8 +82,18 @@ public class Database {
         return this;
     }
 
+    public Database andWhereColumns(String column1, Condition condition, String column2) {
+        this.queryBuilder += " AND " + column1 + " " +  getCondition(condition) + " " +  column2;
+        return this;
+    }
+
     public Database orWhere(String column, Condition condition, Object value) {
         this.queryBuilder += " OR " + " " +  column + " " +  getCondition(condition) + valueForQueryBuilder(value, condition);
+        return this;
+    }
+
+    public Database orWhereColumns(String column1, Condition condition, String column2) {
+        this.queryBuilder += " OR " + " " +  column1 + " " +  getCondition(condition) + column2;
         return this;
     }
 
@@ -148,6 +179,18 @@ public class Database {
         keys = keys.substring(0, (keys.length() - 2)) + ")";
         values = values.substring(0, (values.length() - 2)) + ")";
         this.queryBuilder = query + " " + keys + " VALUE " + values;
+        return this;
+    }
+
+    public Database update(String table, HashMap<String, Object> columnValueCollection) {
+        String query = "UPDATE " + table + " SET ";
+        Set<Map.Entry<String, Object>> entrySet = columnValueCollection.entrySet();
+        for (Map.Entry<String, Object> entry : entrySet) {
+            String column = entry.getKey();
+            Object value = entry.getValue();
+            query += column + " = " + valueForQueryBuilder(value) + ", ";
+        }
+        this.queryBuilder = query.substring(0, (query.length() - 2));
         return this;
     }
 

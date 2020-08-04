@@ -34,7 +34,7 @@ public class WebController {
         return req.getSession().getAttribute(key);
     }
 
-    protected HashMap<String, String> getQueryHashMap(HttpServletRequest req) {
+    private HashMap<String, String> getQueryHashMap(HttpServletRequest req) {
         String[] splitQueryStringCollection = req.getQueryString().split("&");
         HashMap<String, String> queryKeyValueCollection = new HashMap<>();
         for (String singleQuery : splitQueryStringCollection) {
