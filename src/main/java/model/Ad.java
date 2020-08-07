@@ -36,25 +36,26 @@ public class Ad {
         return description;
     }
 
+    public String getEmployerName() {
+        return employerName;
+    }
+
     public static ArrayList<Ad> fetchAll(int limit, int offset) {
         ArrayList<Ad> adCollection = new ArrayList<>();
-        ResultSet resultSet1 = Database.getInstance().selectAll("ad").where("is_active", Database.Condition.EQUAL, 1)
-                .limit(limit, offset)
-                .printQueryBuilder().fetch();
 
         ResultSet resultSet = Database.getInstance().selectComplex(new HashMap<String, ArrayList<String>>(){{
-            put("ad", new ArrayList<String>(){{
-                add("id");
-                add("employer_id");
-                add("title");
-                add("description");
-            }});
-            put("details", new ArrayList<String>(){{
-                add("company_name");
-            }}); }})
-                .where("ad.is_active", Database.Condition.EQUAL, 1)
-                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
-                .limit(limit, offset).printQueryBuilder().fetch();
+                                            put("ad", new ArrayList<String>(){{
+                                                add("id");
+                                                add("employer_id");
+                                                add("title");
+                                                add("description");
+                                            }});
+                                            put("details", new ArrayList<String>(){{
+                                                add("company_name");
+                                            }}); }})
+                                                .where("ad.is_active", Database.Condition.EQUAL, 1)
+                                                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
+                                                .limit(limit, offset).printQueryBuilder().fetch();
         while (true) {
             try {
                 if (!resultSet.next()) break;
@@ -69,18 +70,6 @@ public class Ad {
     public static ArrayList<Ad> fetchAllByAuthEmployer(int limit, int offset) {
         final ArrayList<Ad> adCollection = new ArrayList<>();
 
-
-//        int authId = Auth.getAuthenticatedUser().getId();
-//        String companyName = DetailsEmployer.fetchDetails(authId).getCompanyName();
-
-
-//        ResultSet resultSet = Database.getInstance().selectAll("ad").where("is_active", Database.Condition.EQUAL, 1)
-//                .andWhere("employer_id", Database.Condition.EQUAL, authId)
-//                .limit(limit, offset)
-//                .printQueryBuilder().fetch();
-
-
-
         ResultSet resultSet = Database.getInstance().selectComplex(new HashMap<String, ArrayList<String>>(){{
                                                                     put("ad", new ArrayList<String>(){{
                                                                         add("id");
@@ -91,11 +80,10 @@ public class Ad {
                                                                     put("details", new ArrayList<String>(){{
                                                                         add("company_name");
                                                                     }}); }})
-                .where("ad.is_active", Database.Condition.EQUAL, 1)
-                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
-                .andWhere("ad.employer_id", Database.Condition.EQUAL, Auth.getAuthenticatedUser().getId())
-                .limit(limit, offset).printQueryBuilder().fetch();
-
+                                                .where("ad.is_active", Database.Condition.EQUAL, 1)
+                                                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
+                                                .andWhere("ad.employer_id", Database.Condition.EQUAL, Auth.getAuthenticatedUser().getId())
+                                                .limit(limit, offset).printQueryBuilder().fetch();
 
         while (true) {
             try {
@@ -108,11 +96,85 @@ public class Ad {
         return adCollection;
     }
 
+    public static Ad fetchAd(int id) {
+
+        ResultSet resultSet = Database.getInstance().selectComplex(new HashMap<String, ArrayList<String>>(){{
+                                                                            put("ad", new ArrayList<String>(){{
+                                                                                add("id");
+                                                                                add("employer_id");
+                                                                                add("title");
+                                                                                add("description");
+                                                                            }});
+                                                                            put("details", new ArrayList<String>(){{
+                                                                                add("company_name");
+                                                                            }}); }})
+                .where("ad.is_active", Database.Condition.EQUAL, 1)
+                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
+                .andWhere("ad.id", Database.Condition.EQUAL, id)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return Ad.newAdFromDB(resultSet);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static String fetchStatus(int adId, int userId) {
+        ResultSet resultSet = Database.getInstance().selectComplex(new HashMap<String, ArrayList<String>>(){{
+            put("status", new ArrayList<String>(){{
+                add("value");
+            }});
+            put("ad__employee", new ArrayList<String>(){{
+                add("id");
+            }});
+        }})
+                .where("ad__employee.ad_id", Database.Condition.EQUAL, adId)
+                .andWhere("ad__employee.user_id", Database.Condition.EQUAL, userId)
+                .andWhereColumns("ad__employee.status", Database.Condition.EQUAL, "status.id")
+                .andWhere("ad__employee.is_active", Database.Condition.EQUAL, 1)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getString("value");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static void create(final int employerId, final String title, final String description) {
+        Database.getInstance().insert("ad", new HashMap<String, Object>(){{
+            put("employer_id", employerId);
+            put("title", title);
+            put("description", description);
+        }}).printQueryBuilder().execute();
+    }
+
+    public static void update(int id, HashMap<String, Object> columnValueCollection) {
+        Database.getInstance().update("ad", columnValueCollection)
+                            .where("id", Database.Condition.EQUAL, id)
+                            .printQueryBuilder().execute();
+
+    }
+
     public static void deleteById(int id) {
         Database.getInstance().update("ad", new HashMap<String, Object>(){{ put("is_active", 0); }})
                             .where("id", Database.Condition.EQUAL, id)
                             .andWhere("employer_id", Database.Condition.EQUAL, Auth.getAuthenticatedUser().getId())
                             .printQueryBuilder().execute();
+    }
+
+    public static void apply(final int adId) {
+        Database.getInstance().insert("ad__employee", new HashMap<String, Object>(){{
+            put("ad_id", adId);
+            put("user_id", Auth.getAuthenticatedUser().getId());
+        }}).printQueryBuilder().execute();
     }
 
     private static Ad newAdFromDB(ResultSet resultSet) throws SQLException {
@@ -122,10 +184,6 @@ public class Ad {
                 resultSet.getString("title"),
                 resultSet.getString("description"));
         return ad;
-    }
-
-    public static void fetchAd() {
-
     }
 
 }

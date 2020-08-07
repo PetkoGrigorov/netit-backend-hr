@@ -9,6 +9,7 @@
     <h1>Employer's Announcement</h1>
     <div>
         <a href="/Jobser_war2/base/announcement/create">Create new ad</a>
+        <hr>
     </div>
 
 
@@ -20,8 +21,8 @@
                 out.print("<div>ID: " + ad.getId() + "</div>");
                 out.print("<div>Title: " + ad.getTitle() + "</div>");
                 out.print("<div>Description: " + ad.getDescription() + "</div>");
-                out.print("<div style=\"color: crimson\"><a href=\"/Jobser_war2/base/announcement/update?ad_id=" + ad.getId() + "\">Update</a></div>");
-                out.print("<div style=\"color: crimson\"><a href=\"/Jobser_war2/base/announcement/delete?ad_id=" + ad.getId() + "\">Delete</a></div>");
+                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/update?ad_id=" + ad.getId() + "\">Update</a></div>");
+                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/delete?ad_id=" + ad.getId() + "\">Delete</a></div>");
                 out.print("<hr>");
             }
         }

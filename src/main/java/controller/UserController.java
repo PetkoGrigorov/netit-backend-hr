@@ -2,6 +2,7 @@ package controller;
 
 import framework.WebController;
 import framework.annotation.MVCRouteMethod;
+import framework.annotation.RoleAccess;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +14,13 @@ public class UserController extends WebController {
     }
 
     @MVCRouteMethod(path = "/user/create", method = "GET")
+    @RoleAccess(role = 1)
     public void create(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute user/create");
+    }
+
+    @MVCRouteMethod(path = "/user/create", method = "GET")
+    public void update(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute user/create");
     }
 

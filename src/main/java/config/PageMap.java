@@ -8,5 +8,8 @@ public interface PageMap {
     String REGISTRATION_PAGE = "/auth/registration.jsp";
     String OWN_LIST_PAGE = "/ad/own_list.jsp";
     String DASHBOARD_PAGE = "/ad/dashboard.jsp";
+    String CREATE_AD_PAGE = "/ad/create.jsp";
+    String UPDATE_AD_PAGE = "/ad/update.jsp";
+    String DETAILS_AD_PAGE = "/ad/details.jsp";
 
 }

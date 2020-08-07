@@ -89,6 +89,14 @@ public class User {
         }}).printQueryBuilder().execute();
     }
 
+    public static void update() {
+
+    }
+
+    public static void delete() {
+
+    }
+
     public static void undoCreate(String username) {
         Database.getInstance().delete("users").where("username", Database.Condition.EQUAL, username).printQueryBuilder().execute();
     }
