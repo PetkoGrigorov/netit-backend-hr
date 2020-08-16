@@ -51,7 +51,11 @@ public class WebController {
     }
 
     protected boolean hasQuery(HttpServletRequest req, String key) {
-        return req.getQueryString().contains(key);
+        try {
+            return req.getQueryString().contains(key);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     protected String getQueryValue(HttpServletRequest req, String key) {

@@ -100,12 +100,12 @@ public class AnnouncementController extends WebController {
     @RoleAccess(role = 3)
     public void listRole3(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole3");
-        int limit = getLimitFromQuery(req);
-        int pageIndex = getPageIndexFromQuery(req);
+        int pageLimit = getPageLimit(req);
+        int pageIndex = getPageIndex(req);
 
 
-        int offset = (pageIndex - 1) * limit;
-        ArrayList<Ad> adCollection = Ad.fetchAllByAuthEmployer(limit, offset);
+        int offset = (pageIndex - 1) * pageLimit;
+        ArrayList<Ad> adCollection = Ad.fetchAllByAuthEmployer(pageLimit, offset);
         setSession(req, "ad_collection", adCollection);
         display(req, resp, PageMap.OWN_LIST_PAGE);
 //        redirect(resp, PageMap.OWN_LIST_PAGE);
@@ -115,10 +115,45 @@ public class AnnouncementController extends WebController {
     @RoleAccess(role = 4)
     public void listRole4(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole4");
-        int limit = getLimitFromQuery(req);
-        int pageIndex = getPageIndexFromQuery(req);
-        int offset = (pageIndex - 1) * limit;
-        ArrayList<Ad> adCollection = Ad.fetchAll(limit, offset);
+        int pageLimit = getPageLimit(req);
+        int pageIndex = getPageIndex(req);
+
+
+        ArrayList<Ad> adCollection;
+
+        String searchKey = null;
+        if (getSession(req, "search_key") != null) {
+            searchKey = getSession(req, "search_key").toString();
+        }
+        if (hasQuery(req, "search_key")) {
+            searchKey = getSearchKeyFromQuery(req);
+        }
+        System.out.println("searchKey: " + searchKey);
+
+        int adCount = 0;
+        if (searchKey != null) {
+            setSession(req, "search_key", searchKey);
+            adCount = Ad.getCount(searchKey);
+            int offset = getOffset(adCount, pageLimit, pageIndex);
+            adCollection = Ad.fetchAllLike("company_name", searchKey, pageLimit, offset);
+
+        } else {
+            setSession(req, "search_key", null);
+            adCount = Ad.getCount();
+            int offset = getOffset(adCount, pageLimit, pageIndex);
+            adCollection = Ad.fetchAll(pageLimit, offset);
+        }
+        setSession(req, "ad_count", adCount);
+        System.out.println("adCount: " + adCount);
+
+
+
+        int offsetCorrection = (pageIndex < 1) ? 0 : (pageIndex - 1);
+        pageIndex =  getCorrectPageIndex(adCount, pageLimit, pageIndex);
+        setSession(req, "page_index", pageIndex);
+        setSession(req, "page_limit", pageLimit);
+
+
         setSession(req, "ad_collection", adCollection);
         display(req, resp, PageMap.DASHBOARD_PAGE);
 //        redirect(resp, PageMap.DASHBOARD_PAGE);
@@ -139,6 +174,16 @@ public class AnnouncementController extends WebController {
         System.out.println("Execute announcement/details");
 
         int adId = getAdIdFromQuery(req);
+
+        if (Auth.getAuthenticatedUser().getRole() == 3) {
+            if (!Ad.isAdBelongsToAuthEmployer(adId)) {
+                setSession(req, "ad", null);
+                display(req, resp, PageMap.DETAILS_AD_PAGE);
+//                redirect(resp, PageMap.PAGE_NOT_FOUND);
+                return;
+            }
+        }
+
         Ad ad = Ad.fetchAd(adId);
         setSession(req, "ad", ad);
 
@@ -151,27 +196,26 @@ public class AnnouncementController extends WebController {
 //        redirect(resp, PageMap.DASHBOARD_PAGE);
     }
 
-    private int getLimitFromQuery(HttpServletRequest req) {
-        int limit;
-        try {
-            limit = Integer.parseInt(getQueryValue(req, "page_limit"));
-        } catch (Exception e) {
-            limit = 10;
+    private int getPageLimit(HttpServletRequest req) {
+        int pageLimit = 2;
+        if (getSession(req, "page_limit") != null) {
+            pageLimit = Integer.parseInt (getSession(req, "page_limit").toString());
         }
-//        int limit = (!hasQuery(req,"page_limit")) ? 10 : Integer.parseInt(getQueryValue(req,"page_limit"));
-        return limit;
+        pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req,"page_limit")) : pageLimit;
+//        setSessionAttrib(req, "page_limit", pageLimit);
+        return pageLimit;
     }
 
-    private int getPageIndexFromQuery(HttpServletRequest req) {
-        int pageIndex;
-        try {
-            pageIndex = Integer.parseInt(getQueryValue(req, "page_index"));
-        } catch (Exception e) {
-            pageIndex = 1;
+    private int getPageIndex(HttpServletRequest req) {
+        int pageIndex = 1;
+        if (getSession(req, "page_index") != null) {
+//            pageIndex = Integer.parseInt((req.getSession().getAttribute("page_index")).toString());
+            pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
         }
-//        int pageIndex = (!hasQuery(req, "page_index")) ? 1 : Integer.parseInt(getQueryValue(req,"page_index"));
+        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req,"page_index")) : pageIndex;
         return pageIndex;
     }
+
 
     private int getAdIdFromQuery(HttpServletRequest req) {
         int adId;
@@ -182,6 +226,33 @@ public class AnnouncementController extends WebController {
         }
 //        int adId = (!hasQuery(req, "ad_id")) ? 1 : Integer.parseInt(getQueryValue(req,"ad_id"));
         return adId;
+    }
+
+    private String getSearchKeyFromQuery(HttpServletRequest req) {
+        String searchKey;
+        try {
+            searchKey = getQueryValue(req, "search_key");
+        } catch (Exception e) {
+            searchKey = null;
+        }
+        return searchKey;
+    }
+
+    private int getOffset(int adCount, int pageLimit, int pageIndex) {
+        pageIndex = getCorrectPageIndex(adCount, pageLimit, pageIndex);
+        int offset = (pageIndex - 1) * pageLimit;
+        return offset;
+    }
+
+    private int getCorrectPageIndex(int adCount, int pageLimit, int pageIndex) {
+        int numberOfPages = (int) Math.ceil(adCount*1.0/pageLimit);
+        if (pageIndex > numberOfPages) {
+            pageIndex = numberOfPages;
+        }
+        if (pageIndex < 1) {
+            pageIndex = 1;
+        }
+        return pageIndex;
     }
 
 }

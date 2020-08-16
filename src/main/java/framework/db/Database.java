@@ -132,7 +132,7 @@ public class Database {
     }
 
     private String valueForQueryBuilder(Object value, Condition condition) {
-        if (condition.equals("LIKE")) {
+        if (condition == Condition.LIKE) {
             return "'%" + value + "%'";
         }
         if (value instanceof String) {
@@ -199,6 +199,11 @@ public class Database {
         return this;
     }
 
+    public Database count(String tableName) {
+        this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + tableName;
+        return this;
+    }
+
     public void execute() {
         try {
             this.dbStatement.execute(this.queryBuilder, Statement.RETURN_GENERATED_KEYS);
@@ -217,6 +222,31 @@ public class Database {
             e.printStackTrace();
         }
         return Long.parseLong(null);
+    }
+
+    public Database stringQuery(String query) {
+        this.queryBuilder = query;
+        return  this;
+    }
+
+    public Database selectCountFromString(String tablesString) {
+        this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + tablesString;
+        return this;
+    }
+
+    public Database whereString(String conditionString) {
+        this.queryBuilder += " WHERE " + conditionString;
+        return this;
+    }
+
+    public Database andWhereString(String conditionString) {
+        this.queryBuilder += " AND " + conditionString;
+        return this;
+    }
+
+    public Database orWhereString(String conditionString) {
+        this.queryBuilder += " OR " + conditionString;
+        return this;
     }
 
 }

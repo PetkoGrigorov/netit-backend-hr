@@ -52,10 +52,39 @@ public class Ad {
                                             }});
                                             put("details", new ArrayList<String>(){{
                                                 add("company_name");
-                                            }}); }})
+                                            }});
+                                            }})
                                                 .where("ad.is_active", Database.Condition.EQUAL, 1)
                                                 .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
                                                 .limit(limit, offset).printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newAdFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
+    }
+
+    public static ArrayList<Ad> fetchAllLike(String column, String likeKey, int limit, int offset) {
+        ArrayList<Ad> adCollection = new ArrayList<>();
+        ResultSet resultSet = Database.getInstance().selectComplex(new HashMap<String, ArrayList<String>>(){{
+            put("ad", new ArrayList<String>(){{
+                add("id");
+                add("employer_id");
+                add("title");
+                add("description");
+            }});
+            put("details", new ArrayList<String>(){{
+                add("company_name");
+            }});
+        }})
+                .where("ad.is_active", Database.Condition.EQUAL, 1)
+                .andWhereColumns("ad.employer_id", Database.Condition.EQUAL, "details.user_id")
+                .andWhere(column, Database.Condition.LIKE, likeKey)
+                .limit(limit, offset).printQueryBuilder().fetch();
         while (true) {
             try {
                 if (!resultSet.next()) break;
@@ -94,6 +123,18 @@ public class Ad {
             }
         }
         return adCollection;
+    }
+
+    public static boolean isAdBelongsToAuthEmployer(int id) {
+        ResultSet resultSet = Database.getInstance().selectAll("ad").where("id", Database.Condition.EQUAL, id)
+                                                                    .andWhere("employer_id", Database.Condition.EQUAL, Auth.getAuthenticatedUser().getId())
+                                                                    .printQueryBuilder().fetch();
+        try {
+            return resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static Ad fetchAd(int id) {
@@ -185,5 +226,97 @@ public class Ad {
                 resultSet.getString("description"));
         return ad;
     }
+
+    public static int getCountAll() {
+        ResultSet resultSet = Database.getInstance().selectCountFromString("ad, details")
+                .whereString("ad.is_active=1")
+                .andWhereString("ad.employer_id=details.user_id")
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static int getCountLike(String likeKey) {
+        ResultSet resultSet = Database.getInstance().selectCountFromString("ad, details")
+                .whereString("ad.is_active=1")
+                .andWhereString("ad.employer_id=details.user_id")
+                .andWhereString("company_name LIKE '%" + likeKey + "%'")
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+//    --------------------------------
+
+    private static Database countResultSet() {
+        return Database.getInstance().selectCountFromString("ad, details")
+                .whereString("ad.is_active=1")
+                .andWhereString("ad.employer_id=details.user_id");
+    }
+
+    public static int getCount() {
+        ResultSet resultSet = countResultSet().printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static int getCount(String likeKey) {
+        ResultSet resultSet = countResultSet().andWhereString("company_name LIKE '%" + likeKey + "%'").printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+//    ---------------------------------
+
+    /*public static int getCountAll() throws SQLException {
+        int adCount = 0;
+        ResultSet resultSet = Database.getInstance().count("ad")
+                                                    .where("is_active", Database.Condition.EQUAL, 1)
+                                                    .printQueryBuilder().fetch();
+        while (resultSet.next()) {
+            adCount = resultSet.getInt("entry_count");
+        }
+        return adCount;
+    }*/
+
+    /*public static int getCountLike(String column, String likeValue) throws SQLException {
+        int productCount = 0;
+        ResultSet resultSet = Database.getInstance().count("ad")
+                                                    .where("is_active", Database.Condition.EQUAL, 1)
+                                                    .andWhere()
+                                                    .printQuery().fetch();
+        while (resultSet.next()) {
+            productCount = resultSet.getInt("entry_count");
+        }
+        return productCount;
+    }*/
 
 }
