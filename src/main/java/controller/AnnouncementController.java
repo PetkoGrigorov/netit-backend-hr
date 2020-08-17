@@ -97,18 +97,60 @@ public class AnnouncementController extends WebController {
     }
 
     @MVCRouteMethod(path = "/announcement/list", method = "GET")
+    @RoleAccess(role = 2)
+    public void listRole2(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute announcement/listRole2");
+        if (!hasQuery(req, "list_by")) {
+            display(req, resp, PageMap.HR_LIST_PAGE);
+            return;
+        }
+        String listBy = getQueryValue(req, "list_by");
+        if (listBy.equals("ad")) {
+
+
+
+        } else if (listBy.equals("employee")) {
+
+
+
+        } else {
+            display(req, resp, PageMap.HR_LIST_PAGE);
+        }
+
+
+
+        int pageLimit = getPageLimit(req);
+        int adCount = Ad.getCountByAuthEmployer();
+        int offset = getOffset(req, adCount, pageLimit);
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
+        setSession(req, "ad_count", adCount);
+        setSession(req, "page_index", pageIndex);
+        setSession(req, "page_limit", pageLimit);
+        ArrayList<Ad> adCollection = Ad.fetchAllByAuthEmployer(pageLimit, offset);
+        setSession(req, "ad_collection", adCollection);
+
+        System.out.println("queryString: " + req.getQueryString());
+
+        display(req, resp, PageMap.HR_LIST_PAGE);
+    }
+
+    @MVCRouteMethod(path = "/announcement/list", method = "GET")
     @RoleAccess(role = 3)
     public void listRole3(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole3");
         int pageLimit = getPageLimit(req);
-        int pageIndex = getPageIndex(req);
+//        int pageIndex = getPageIndex(req);
 
-
-        int offset = (pageIndex - 1) * pageLimit;
+//        int offset = (pageIndex - 1) * pageLimit;
+        int adCount = Ad.getCountByAuthEmployer();
+        int offset = getOffset(req, adCount, pageLimit);
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
+        setSession(req, "ad_count", adCount);
+        setSession(req, "page_index", pageIndex);
+        setSession(req, "page_limit", pageLimit);
         ArrayList<Ad> adCollection = Ad.fetchAllByAuthEmployer(pageLimit, offset);
         setSession(req, "ad_collection", adCollection);
         display(req, resp, PageMap.OWN_LIST_PAGE);
-//        redirect(resp, PageMap.OWN_LIST_PAGE);
     }
 
     @MVCRouteMethod(path = "/announcement/list", method = "GET")
@@ -116,47 +158,31 @@ public class AnnouncementController extends WebController {
     public void listRole4(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole4");
         int pageLimit = getPageLimit(req);
-        int pageIndex = getPageIndex(req);
-
-
-        ArrayList<Ad> adCollection;
-
-        String searchKey = null;
-        if (getSession(req, "search_key") != null) {
-            searchKey = getSession(req, "search_key").toString();
-        }
-        if (hasQuery(req, "search_key")) {
-            searchKey = getSearchKeyFromQuery(req);
-        }
+        String searchKey = getSearchKey(req);
         System.out.println("searchKey: " + searchKey);
 
+        ArrayList<Ad> adCollection;
         int adCount = 0;
         if (searchKey != null) {
             setSession(req, "search_key", searchKey);
             adCount = Ad.getCount(searchKey);
-            int offset = getOffset(adCount, pageLimit, pageIndex);
+            int offset = getOffset(req, adCount, pageLimit);
             adCollection = Ad.fetchAllLike("company_name", searchKey, pageLimit, offset);
-
         } else {
             setSession(req, "search_key", null);
             adCount = Ad.getCount();
-            int offset = getOffset(adCount, pageLimit, pageIndex);
+            int offset = getOffset(req, adCount, pageLimit);
             adCollection = Ad.fetchAll(pageLimit, offset);
         }
         setSession(req, "ad_count", adCount);
         System.out.println("adCount: " + adCount);
 
-
-
-        int offsetCorrection = (pageIndex < 1) ? 0 : (pageIndex - 1);
-        pageIndex =  getCorrectPageIndex(adCount, pageLimit, pageIndex);
+        int pageIndex =  getCorrectPageIndex(req, adCount, pageLimit);
         setSession(req, "page_index", pageIndex);
         setSession(req, "page_limit", pageLimit);
 
-
         setSession(req, "ad_collection", adCollection);
         display(req, resp, PageMap.DASHBOARD_PAGE);
-//        redirect(resp, PageMap.DASHBOARD_PAGE);
     }
 
     @MVCRouteMethod(path = "/announcement/apply", method = "GET")
@@ -197,25 +223,47 @@ public class AnnouncementController extends WebController {
     }
 
     private int getPageLimit(HttpServletRequest req) {
-        int pageLimit = 2;
+        int pageLimit = 3;
         if (getSession(req, "page_limit") != null) {
             pageLimit = Integer.parseInt (getSession(req, "page_limit").toString());
         }
         pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req,"page_limit")) : pageLimit;
-//        setSessionAttrib(req, "page_limit", pageLimit);
         return pageLimit;
     }
 
     private int getPageIndex(HttpServletRequest req) {
         int pageIndex = 1;
         if (getSession(req, "page_index") != null) {
-//            pageIndex = Integer.parseInt((req.getSession().getAttribute("page_index")).toString());
             pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
         }
         pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req,"page_index")) : pageIndex;
         return pageIndex;
     }
 
+    private int getCorrectPageIndex(HttpServletRequest req, int adCount, int pageLimit) {
+        int pageIndex = 1;
+        if (getSession(req, "page_index") != null) {
+            pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
+        }
+        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req,"page_index")) : pageIndex;
+        int numberOfPages = (int) Math.ceil(adCount*1.0/pageLimit);
+        if (pageIndex > numberOfPages) {
+            pageIndex = numberOfPages;
+        }
+        if (pageIndex < 1) {
+            pageIndex = 1;
+        }
+        return pageIndex;
+    }
+
+    private String getSearchKey(HttpServletRequest req) {
+        String searchKey = null;
+        if (getSession(req, "search_key") != null) {
+            searchKey = getSession(req, "search_key").toString();
+        }
+        searchKey = (hasQuery(req, "search_key")) ? getQueryValue(req, "search_key") : searchKey;
+        return searchKey;
+    }
 
     private int getAdIdFromQuery(HttpServletRequest req) {
         int adId;
@@ -228,7 +276,7 @@ public class AnnouncementController extends WebController {
         return adId;
     }
 
-    private String getSearchKeyFromQuery(HttpServletRequest req) {
+    /*private String getSearchKeyFromQuery(HttpServletRequest req) {
         String searchKey;
         try {
             searchKey = getQueryValue(req, "search_key");
@@ -236,23 +284,14 @@ public class AnnouncementController extends WebController {
             searchKey = null;
         }
         return searchKey;
-    }
+    }*/
 
-    private int getOffset(int adCount, int pageLimit, int pageIndex) {
-        pageIndex = getCorrectPageIndex(adCount, pageLimit, pageIndex);
+    private int getOffset(HttpServletRequest req, int adCount, int pageLimit) {
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
         int offset = (pageIndex - 1) * pageLimit;
         return offset;
     }
 
-    private int getCorrectPageIndex(int adCount, int pageLimit, int pageIndex) {
-        int numberOfPages = (int) Math.ceil(adCount*1.0/pageLimit);
-        if (pageIndex > numberOfPages) {
-            pageIndex = numberOfPages;
-        }
-        if (pageIndex < 1) {
-            pageIndex = 1;
-        }
-        return pageIndex;
-    }
+
 
 }

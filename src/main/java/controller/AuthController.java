@@ -7,6 +7,7 @@ import framework.annotation.MVCRouteMethod;
 import framework.db.Database;
 import model.DetailsEmployee;
 import model.DetailsEmployer;
+import model.DetailsHr;
 import model.User;
 import model.system.Auth;
 
@@ -45,6 +46,12 @@ public class AuthController extends WebController {
         User authUser = Auth.getAuthenticatedUser();
         String authUserName = null;
         int userRole = authUser.getRole();
+        if (userRole == 2) {
+            authUserName = DetailsHr.fetchDetails(authUser.getId()).getFullName();
+            setSession(req,"auth_user", "HR: " + authUserName);
+            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
+            return;
+        }
         if (userRole == 3) {
             authUserName = DetailsEmployer.fetchDetails(authUser.getId()).getCompanyName();
             setSession(req,"auth_user", authUserName);

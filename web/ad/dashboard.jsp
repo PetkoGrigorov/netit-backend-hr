@@ -26,7 +26,6 @@
                 }
                 out.print("<div>ID: " + adId + "</div>");
                 out.print("<div>Title: " + ad.getTitle() + "</div>");
-//                out.print("<div>Description: " + ad.getDescription() + "</div>");
                 out.print("<div>Company Name: " + ad.getEmployerName() + "</div>");
                 out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details?ad_id=" + ad.getId() + "\">Details</a></div>");
                 out.print("<hr>");
