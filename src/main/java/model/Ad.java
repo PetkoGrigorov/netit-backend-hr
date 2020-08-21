@@ -371,4 +371,77 @@ public class Ad {
         return productCount;
     }*/
 
+    public static int getCountBase(String fromString, String whereString) {
+        ResultSet resultSet = Database.getInstance().selectCountFromString(fromString, whereString)
+                                                    .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static int getCountSQL(String countSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static ArrayList<Ad> fetchAd(String selectString, String fromString, String whereString) {
+        ResultSet resultSet = Database.getInstance().selectBase(selectString, fromString, whereString)
+                                                    .printQueryBuilder().fetch();
+        ArrayList<Ad> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newAdFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
+    }
+
+    public static ArrayList<Ad> fetchAdSQL(String adCollectionSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(adCollectionSQL)
+                .printQueryBuilder().fetch();
+        ArrayList<Ad> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newAdFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
+    }
+
+    public static ArrayList<Ad> fetchAd(String query) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(query)
+                .printQueryBuilder().fetch();
+        ArrayList<Ad> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newAdFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
+    }
+
 }

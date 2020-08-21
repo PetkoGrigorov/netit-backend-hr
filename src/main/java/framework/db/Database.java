@@ -29,6 +29,11 @@ public class Database {
         }
     }
 
+    public Database sqlSelect(String query) {
+        this.queryBuilder = query;
+        return this;
+    }
+
     public static Database getInstance() {
         if (instance == null){
             instance = new Database();
@@ -224,13 +229,31 @@ public class Database {
         return Long.parseLong(null);
     }
 
-    public Database stringQuery(String query) {
-        this.queryBuilder = query;
+    public Database stringQuery(String stringQuery) {
+        this.queryBuilder = stringQuery;
         return  this;
     }
 
-    public Database selectCountFromString(String tablesString) {
-        this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + tablesString;
+    public Database selectCountFromString(String fromString) {
+        this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + fromString;
+        return this;
+    }
+
+    public Database selectCountFromString(String countCondition, String query, String whereString) {
+        if (whereString == null || whereString.equals("")){
+            this.queryBuilder = "SELECT COUNT(" + countCondition + ") AS entry_count FROM " + query;
+        } else {
+            this.queryBuilder = "SELECT COUNT(" + countCondition + ") AS entry_count FROM " + query + " WHERE " + whereString;
+        }
+        return this;
+    }
+
+    public Database selectCountFromString(String fromString, String whereString) {
+        if (whereString == null || whereString.equals("")){
+            this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + fromString;
+        }
+        this.queryBuilder = "SELECT COUNT(*) AS entry_count FROM " + fromString + " WHERE " + whereString;
+
         return this;
     }
 
@@ -246,6 +269,16 @@ public class Database {
 
     public Database orWhereString(String conditionString) {
         this.queryBuilder += " OR " + conditionString;
+        return this;
+    }
+
+    public Database selectBase(String selectString, String fromString) {
+        this.queryBuilder = "SELECT " + selectString + " FROM " + fromString;
+        return this;
+    }
+
+    public Database selectBase(String selectString, String fromString, String whereString) {
+        this.queryBuilder = "SELECT " + selectString + " FROM " + fromString + " WHERE " + whereString;
         return this;
     }
 

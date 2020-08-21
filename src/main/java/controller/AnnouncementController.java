@@ -107,10 +107,16 @@ public class AnnouncementController extends WebController {
         String listBy = getQueryValue(req, "list_by");
         if (listBy.equals("ad")) {
 
+            String countSQL = "SELECT COUNT(DISTINCT ad__employee.ad_id) AS entry_count FROM ad__employee, details, users, ad WHERE ad__employee.is_active=1";
+            String adCollectionSQL = "SELECT DISTINCT ad__employee.ad_id AS id, ad.employer_id AS employer_id, ad.title, details.company_name AS company_name, ad.description " +
+                    "FROM ad__employee, ad, details, users " +
+                    "WHERE ad__employee.is_active=1 AND ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id";
+            String searchColumn = "ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id AND details.company_name";
+
+            pagingHr(req, resp, countSQL, adCollectionSQL, searchColumn);
 
 
         } else if (listBy.equals("employee")) {
-
 
 
         } else {
@@ -118,10 +124,9 @@ public class AnnouncementController extends WebController {
         }
 
 
-
         int pageLimit = getPageLimit(req);
         int adCount = Ad.getCountByAuthEmployer();
-        int offset = getOffset(req, adCount, pageLimit);
+        int offset = getPageOffset(req, adCount, pageLimit);
         int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
         setSession(req, "ad_count", adCount);
         setSession(req, "page_index", pageIndex);
@@ -143,7 +148,7 @@ public class AnnouncementController extends WebController {
 
 //        int offset = (pageIndex - 1) * pageLimit;
         int adCount = Ad.getCountByAuthEmployer();
-        int offset = getOffset(req, adCount, pageLimit);
+        int offset = getPageOffset(req, adCount, pageLimit);
         int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
         setSession(req, "ad_count", adCount);
         setSession(req, "page_index", pageIndex);
@@ -166,18 +171,18 @@ public class AnnouncementController extends WebController {
         if (searchKey != null) {
             setSession(req, "search_key", searchKey);
             adCount = Ad.getCount(searchKey);
-            int offset = getOffset(req, adCount, pageLimit);
+            int offset = getPageOffset(req, adCount, pageLimit);
             adCollection = Ad.fetchAllLike("company_name", searchKey, pageLimit, offset);
         } else {
             setSession(req, "search_key", null);
             adCount = Ad.getCount();
-            int offset = getOffset(req, adCount, pageLimit);
+            int offset = getPageOffset(req, adCount, pageLimit);
             adCollection = Ad.fetchAll(pageLimit, offset);
         }
         setSession(req, "ad_count", adCount);
         System.out.println("adCount: " + adCount);
 
-        int pageIndex =  getCorrectPageIndex(req, adCount, pageLimit);
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
         setSession(req, "page_index", pageIndex);
         setSession(req, "page_limit", pageLimit);
 
@@ -225,9 +230,9 @@ public class AnnouncementController extends WebController {
     private int getPageLimit(HttpServletRequest req) {
         int pageLimit = 3;
         if (getSession(req, "page_limit") != null) {
-            pageLimit = Integer.parseInt (getSession(req, "page_limit").toString());
+            pageLimit = Integer.parseInt(getSession(req, "page_limit").toString());
         }
-        pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req,"page_limit")) : pageLimit;
+        pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req, "page_limit")) : pageLimit;
         return pageLimit;
     }
 
@@ -236,7 +241,7 @@ public class AnnouncementController extends WebController {
         if (getSession(req, "page_index") != null) {
             pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
         }
-        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req,"page_index")) : pageIndex;
+        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req, "page_index")) : pageIndex;
         return pageIndex;
     }
 
@@ -245,8 +250,8 @@ public class AnnouncementController extends WebController {
         if (getSession(req, "page_index") != null) {
             pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
         }
-        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req,"page_index")) : pageIndex;
-        int numberOfPages = (int) Math.ceil(adCount*1.0/pageLimit);
+        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req, "page_index")) : pageIndex;
+        int numberOfPages = (int) Math.ceil(adCount * 1.0 / pageLimit);
         if (pageIndex > numberOfPages) {
             pageIndex = numberOfPages;
         }
@@ -286,12 +291,72 @@ public class AnnouncementController extends WebController {
         return searchKey;
     }*/
 
-    private int getOffset(HttpServletRequest req, int adCount, int pageLimit) {
+    private int getPageOffset(HttpServletRequest req, int adCount, int pageLimit) {
         int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
         int offset = (pageIndex - 1) * pageLimit;
         return offset;
     }
 
+    private void paging(HttpServletRequest req, HttpServletResponse resp, String selectString, String fromString, String whereString, String searchColumn) {
 
+        String searchKey = getSearchKey(req);
+        ArrayList<Ad> adCollection;
+        int adCount = 0;
+        int pageLimit = getPageLimit(req);
+        int pageOffset = 0;
+
+        if (searchKey != null) {
+            setSession(req, "search_key", searchKey);
+            adCount = Ad.getCountBase(fromString, whereString + " AND " + searchColumn + " like '%" + searchKey + "%'");
+            pageOffset = getPageOffset(req, adCount, pageLimit);
+            adCollection = Ad.fetchAd(selectString, fromString,
+                    whereString + " AND " + searchColumn + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
+        } else {
+            setSession(req, "search_key", null);
+            adCount = Ad.getCountBase(fromString, whereString);
+            pageOffset = getPageOffset(req, adCount, pageLimit);
+            adCollection = Ad.fetchAd(selectString, fromString,
+                    whereString + " LIMIT " + pageOffset + ", " + pageLimit);
+        }
+
+        setSession(req, "ad_count", adCount);
+
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
+        setSession(req, "page_index", pageIndex);
+        setSession(req, "page_limit", pageLimit);
+        setSession(req, "ad_collection", adCollection);
+        display(req, resp, PageMap.DASHBOARD_PAGE);
+    }
+
+    private void pagingHr(HttpServletRequest req, HttpServletResponse resp, String countSQL, String adCollectionSQL, String searchColumn) {
+
+        String searchKey = getSearchKey(req);
+        ArrayList<Ad> collection;
+        int adCount = 0;
+        int pageLimit = getPageLimit(req);
+        int pageOffset = 0;
+
+        if (searchKey != null) {
+            setSession(req, "search_key", searchKey);
+            adCount = Ad.getCountSQL(countSQL + " AND " + searchColumn + " like '%" + searchKey + "%'");
+            System.out.println("Count(like): " + adCount);
+            pageOffset = getPageOffset(req, adCount, pageLimit);
+            collection = Ad.fetchAdSQL(adCollectionSQL + " AND " + searchColumn + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
+        } else {
+            setSession(req, "search_key", null);
+            adCount = Ad.getCountSQL(countSQL);
+            System.out.println("Count: " + adCount);
+            pageOffset = getPageOffset(req, adCount, pageLimit);
+            collection = Ad.fetchAdSQL(adCollectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
+        }
+
+        setSession(req, "ad_count", adCount);
+
+        int pageIndex = getCorrectPageIndex(req, adCount, pageLimit);
+        setSession(req, "page_index", pageIndex);
+        setSession(req, "page_limit", pageLimit);
+        setSession(req, "ad_collection", collection);
+        display(req, resp, PageMap.HR_LIST_PAGE);
+    }
 
 }
