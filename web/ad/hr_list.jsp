@@ -31,10 +31,6 @@
             int userId = Auth.getAuthenticatedUser().getId();
             for (Ad ad : adCollection) {
                 int adId = ad.getId();
-                String status = Ad.fetchStatus(adId, userId);
-                if (status != null) {
-                    out.print("<div style=\"color: green\">Status: " + status + "</div>");
-                }
                 out.print("<div>ID: " + adId + "</div>");
                 out.print("<div>Title: " + ad.getTitle() + "</div>");
                 out.print("<div>Company Name: " + ad.getEmployerName() + "</div>");
