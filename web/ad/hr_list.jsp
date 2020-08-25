@@ -1,6 +1,8 @@
 <%@ page import="model.Ad" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="model.system.Auth" %>
+<%@ page import="model.DetailsEmployer" %>
+<%@ page import="model.DetailsEmployee" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <jsp:include page="../content/header.jsp"></jsp:include>
@@ -20,16 +22,18 @@
 
 
     <%
-        ArrayList<Ad> adCollection = (ArrayList<Ad>) request.getSession().getAttribute("ad_collection");
-        if (adCollection != null) {
+//     ArrayList<?> collection = (ArrayList<?>) request.getSession().getAttribute("collection");
 
+        if (request.getSession().getAttribute("list_by") != null) {
             out.print("<form>\n" +
                     "        <input type=\"text\" placeholder=\"search\" name=\"search_key\">\n" +
                     "        <input type=\"submit\">\n" +
                     "    </form>");
 
-            int userId = Auth.getAuthenticatedUser().getId();
-            for (Ad ad : adCollection) {
+            if (request.getSession().getAttribute("list_by").equals("ad")) {
+            out.print("<h2>Ads</h2>");
+            ArrayList<Ad> collection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
+            for (Ad ad : collection) {
                 int adId = ad.getId();
                 out.print("<div>ID: " + adId + "</div>");
                 out.print("<div>Title: " + ad.getTitle() + "</div>");
@@ -38,17 +42,33 @@
                 out.print("<hr>");
             }
 
-            //        ---------------------------------------------------------------------
+        }
+        if (request.getSession().getAttribute("list_by").equals("employee")) {
+            out.print("<h2>Employers</h2>");
+            ArrayList<DetailsEmployee> collection = (ArrayList<DetailsEmployee>) request.getSession().getAttribute("collection");
+            for (DetailsEmployee element : collection) {
+                int employerId = element.getUserId();
+                out.print("<div>ID: " + employerId + "</div>");
+                out.print("<div>Employee's Name: " + element.getFullName() + "</div>");
+                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details?employer_id=" + employerId + "\">Details</a></div>");
+                out.print("<hr>");
+            }
 
-            int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
-            int adCount = Integer.parseInt ((request.getSession().getAttribute("ad_count")).toString());
+
+//            for (DetailsEmployee element : collection) {
+//                int employerId = element.getUserId();
+//                out.print("<div>ID: " + employerId + "</div>");
+//                out.print("<div>Employee's Name: " + element.getFullName() + "</div>");
+//                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details?employer_id=" + employerId + "\">Details</a></div>");
+//                out.print("<hr>");
+//            }
+        }
+
+        int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
+            int adCount = Integer.parseInt ((request.getSession().getAttribute("object_count")).toString());
             int pageIndex = Integer.parseInt ((request.getSession().getAttribute("page_index")).toString());
             int previousIndex = (pageIndex < 2) ? 1 : (pageIndex - 1);
             int nextIndex = pageIndex + 1;
-//        String searchString = "";
-//        if (session.getAttribute("search_string") != null) {
-//            searchString = session.getAttribute("search_string").toString();
-//        }
 
             if (pageIndex > 1) {
                 String previousPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + previousIndex + /*"&search_string=" + searchString + */"\">Previous page</a></div>";
@@ -81,24 +101,7 @@
                 out.print(nextPage);
             }
 
-
-
-
-//        ---------------------------------------------------------------------
-
-        }
-
-
-
-    %>
-
-    <div></div>
-    <div >
-
-        <%
-
-            if (adCollection != null) {
-
+            out.print("<div></div>");
             out.print("<div style=\"display: inline-block; width: 200px\">Shown products on page:</div>");
 
 
@@ -122,6 +125,7 @@
                     break;
                 default: String color = "; color: indigo";
             }
+
             out.print("<span><a style=\" padding-left: 5px " + color3 + "\"  href=\"list?page_limit=3\">3</a></span>");
             out.print("<span> </span>");
             out.print("<span><a style=\" padding-left: 5px " + color5 + "\"  href=\"list?page_limit=5\">5</a></span>");
@@ -130,10 +134,11 @@
 
             out.print("</div>");
 
-            }
+        }
 
-        %>
+    %>
 
+    <div></div>
 
 
 </div>

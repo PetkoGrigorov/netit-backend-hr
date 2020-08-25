@@ -14,7 +14,7 @@
 
 
     <%
-        ArrayList<Ad> adCollection = (ArrayList<Ad>) request.getSession().getAttribute("ad_collection");
+        ArrayList<Ad> adCollection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
         if (adCollection != null) {
 
             for (Ad ad : adCollection) {
@@ -33,7 +33,7 @@
 //        -----------------------------------------------------------
 
         int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
-        int adCount = Integer.parseInt ((request.getSession().getAttribute("ad_count")).toString());
+        int adCount = Integer.parseInt ((request.getSession().getAttribute("object_count")).toString());
         int pageIndex = Integer.parseInt ((request.getSession().getAttribute("page_index")).toString());
         int previousIndex = (pageIndex < 2) ? 1 : (pageIndex - 1);
         int nextIndex = pageIndex + 1;

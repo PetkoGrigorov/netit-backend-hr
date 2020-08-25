@@ -25,6 +25,10 @@ public class DetailsEmployee {
         this.education = education;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
     public String getFullName() {
         return fullName;
     }
@@ -68,6 +72,45 @@ public class DetailsEmployee {
             }
         }
         return details;
+    }
+
+    public static int getCountSQL(String countSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    private static DetailsEmployee newEmployeeDetailsFromDB(ResultSet resultSet) throws SQLException {
+        DetailsEmployee details = new DetailsEmployee(resultSet.getInt("id"),
+                resultSet.getInt("user_id"),
+                resultSet.getString("full_name"),
+                resultSet.getInt("age"),
+                resultSet.getString("town"),
+                resultSet.getString("education"));
+        return details;
+    }
+
+    public static ArrayList<DetailsEmployee> fetchEmployeeDetailsSQL(String employeeCollectionSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(employeeCollectionSQL)
+                .printQueryBuilder().fetch();
+        ArrayList<DetailsEmployee> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newEmployeeDetailsFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
     }
 
 }

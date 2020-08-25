@@ -19,6 +19,10 @@ public class DetailsEmployer {
         return companyName;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
     public DetailsEmployer(int id, int userId, String companyName, String branch, String description) {
         this.id = id;
         this.userId = userId;
@@ -64,6 +68,44 @@ public class DetailsEmployer {
             }
         }
         return details;
+    }
+
+    private static DetailsEmployer newEmployerDetailsFromDB(ResultSet resultSet) throws SQLException {
+        DetailsEmployer details =new DetailsEmployer(resultSet.getInt("id"),
+                resultSet.getInt("user_id"),
+                resultSet.getString("company_name"),
+                resultSet.getString("branch"),
+                resultSet.getString("description"));
+        return details;
+    }
+
+    public static int getCountSQL(String countSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static ArrayList<DetailsEmployer> fetchEmployerDetailsSQL(String employerCollectionSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(employerCollectionSQL)
+                .printQueryBuilder().fetch();
+        ArrayList<DetailsEmployer> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newEmployerDetailsFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
     }
 
 
