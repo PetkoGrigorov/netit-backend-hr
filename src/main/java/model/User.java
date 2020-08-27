@@ -102,4 +102,43 @@ public class User {
     }
 
 
+    public static int getCountSQL(String countSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+                .printQueryBuilder().fetch();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                return resultSet.getInt("entry_count");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public static ArrayList<User> fetchUserSQL(String adCollectionSQL) {
+        ResultSet resultSet = Database.getInstance().sqlSelect(adCollectionSQL)
+                .printQueryBuilder().fetch();
+        ArrayList<User> adCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                adCollection.add(newUserFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return adCollection;
+    }
+
+    private static User newUserFromDB(ResultSet resultSet) throws SQLException {
+        User user = new User(resultSet.getInt("id"),
+                resultSet.getString("username"),
+                resultSet.getString("password"),
+                resultSet.getString("email"),
+                resultSet.getInt("role"));
+        return user;
+    }
+
+
 }

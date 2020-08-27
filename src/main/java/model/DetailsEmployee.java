@@ -33,6 +33,18 @@ public class DetailsEmployee {
         return fullName;
     }
 
+    public int getAge() {
+        return age;
+    }
+
+    public String getTown() {
+        return town;
+    }
+
+    public String getEducation() {
+        return education;
+    }
+
     public static void create(final int userId, final String fullName, final int age, final String town, final String education) {
 
         Database.getInstance().insert("details", new HashMap<String, Object>() {{

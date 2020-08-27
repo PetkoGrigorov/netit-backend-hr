@@ -346,30 +346,6 @@ public class Ad {
         return null;
     }
 
-//    ---------------------------------
-
-    /*public static int getCountAll() throws SQLException {
-        int adCount = 0;
-        ResultSet resultSet = Database.getInstance().count("ad")
-                                                    .where("is_active", Database.Condition.EQUAL, 1)
-                                                    .printQueryBuilder().fetch();
-        while (resultSet.next()) {
-            adCount = resultSet.getInt("entry_count");
-        }
-        return adCount;
-    }*/
-
-    /*public static int getCountLike(String column, String likeValue) throws SQLException {
-        int productCount = 0;
-        ResultSet resultSet = Database.getInstance().count("ad")
-                                                    .where("is_active", Database.Condition.EQUAL, 1)
-                                                    .andWhere()
-                                                    .printQuery().fetch();
-        while (resultSet.next()) {
-            productCount = resultSet.getInt("entry_count");
-        }
-        return productCount;
-    }*/
 
     public static int getCountBase(String fromString, String whereString) {
         ResultSet resultSet = Database.getInstance().selectCountFromString(fromString, whereString)
@@ -399,7 +375,7 @@ public class Ad {
         return 0;
     }
 
-    public static ArrayList<Ad> fetchAd(String selectString, String fromString, String whereString) {
+   /* public static ArrayList<Ad> fetchAd(String selectString, String fromString, String whereString) {
         ResultSet resultSet = Database.getInstance().selectBase(selectString, fromString, whereString)
                                                     .printQueryBuilder().fetch();
         ArrayList<Ad> adCollection = new ArrayList<>();
@@ -412,7 +388,7 @@ public class Ad {
             }
         }
         return adCollection;
-    }
+    }*/
 
     public static ArrayList<Ad> fetchAdSQL(String adCollectionSQL) {
         ResultSet resultSet = Database.getInstance().sqlSelect(adCollectionSQL)
@@ -429,7 +405,7 @@ public class Ad {
         return adCollection;
     }
 
-    public static ArrayList<Ad> fetchAd(String query) {
+    /*public static ArrayList<Ad> fetchAd(String query) {
         ResultSet resultSet = Database.getInstance().sqlSelect(query)
                 .printQueryBuilder().fetch();
         ArrayList<Ad> adCollection = new ArrayList<>();
@@ -442,6 +418,6 @@ public class Ad {
             }
         }
         return adCollection;
-    }
+    }*/
 
 }

@@ -28,4 +28,11 @@ public class UserController extends WebController {
     public void remove(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute user/remove");
     }
+
+    @MVCRouteMethod(path = "/user/details", method = "GET")
+    @RoleAccess(role = 2)
+    public void details(HttpServletRequest req, HttpServletResponse resp) {
+
+    }
+
 }

@@ -21,13 +21,28 @@
 
 
     <%
-        if (request.getSession().getAttribute("list_by") != null) {
-            out.print("<form>\n" +
-                    "        <input type=\"text\" placeholder=\"search\" name=\"search_key\">\n" +
-                    "        <input type=\"submit\">\n" +
-                    "    </form>");
 
-            if (request.getSession().getAttribute("list_by").equals("ad")) {
+        int employeeId;
+        try {
+            employeeId = Integer.parseInt(request.getSession().getAttribute("employee_id").toString());
+        } catch (Exception e) {
+            employeeId = 0;
+        }
+
+        if (employeeId > 0) {
+
+            String detailsCollectionSql = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education " +
+                    "FROM details " +
+                    "WHERE details.user_id=" + employeeId;
+            DetailsEmployee employeeDetails = DetailsEmployee.fetchEmployeeDetailsSQL(detailsCollectionSql).get(0);
+            out.print("<div>ID: " + employeeDetails.getUserId() + "</div>");
+            out.print("<div>Full name: " + employeeDetails.getFullName() + "</div>");
+            out.print("<div>Age: " + employeeDetails.getAge() + "</div>");
+            out.print("<div>Town: " + employeeDetails.getTown() + "</div>");
+            out.print("<div>Education: " + employeeDetails.getEducation() + "</div>");
+            out.print("<hr>");
+
+
             out.print("<h2>Ads</h2>");
             ArrayList<Ad> collection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
             for (Ad ad : collection) {
@@ -38,29 +53,20 @@
                 out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details?ad_id=" + ad.getId() + "\">Details</a></div>");
                 out.print("<hr>");
             }
+
         }
 
 
-        if (request.getSession().getAttribute("list_by").equals("employee")) {
-            out.print("<h2>Employees</h2>");
-            ArrayList<DetailsEmployee> collection = (ArrayList<DetailsEmployee>) request.getSession().getAttribute("collection");
-            for (DetailsEmployee element : collection) {
-                int employerId = element.getUserId();
-                out.print("<div>ID: " + employerId + "</div>");
-                out.print("<div>Employee's Name: " + element.getFullName() + "</div>");
-                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/list_hr?employee_id=" + employerId + "\">Ads</a></div>");
-                out.print("<hr>");
-            }
-        }
+//        --------------------------------------------------
 
-        int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
+            int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
             int objectCount = Integer.parseInt ((request.getSession().getAttribute("object_count")).toString());
             int pageIndex = Integer.parseInt ((request.getSession().getAttribute("page_index")).toString());
             int previousIndex = (pageIndex < 2) ? 1 : (pageIndex - 1);
             int nextIndex = pageIndex + 1;
 
             if (pageIndex > 1) {
-                String previousPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + previousIndex + "\">Previous page</a></div>";
+                String previousPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"?page_index=" + previousIndex + "\">Previous page</a></div>";
                 out.print(previousPage);
             } else {
                 out.print("<div style=\"display: inline-block; width: 150px\"></div>");
@@ -72,7 +78,7 @@
                 if (pageIndex == coefficient) {
                     color = "color: darkorange";
                 }
-                String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + /*"&search_string=" + searchString + */"\">" + coefficient + "</a></span>";
+                String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + /*"&search_string=" + searchString + */"\">" + coefficient + "</a></span>";
                 out.print(forPageNumber);
                 coefficient ++;
             }
@@ -81,18 +87,17 @@
                 if (pageIndex == coefficient) {
                     color = "color: darkorange";
                 }
-                String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + /*"&search_string=" + searchString +*/ "\">" + coefficient + "</a></span>";
+                String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + /*"&search_string=" + searchString +*/ "\">" + coefficient + "</a></span>";
                 out.print(forPageNumber);
             }
 
             if ((pageIndex * pageLimit) < objectCount) {
-                String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + nextIndex + /*"&search_string=" + searchString +*/ "\">Next page</a></div>";
+                String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"?page_index=" + nextIndex + /*"&search_string=" + searchString +*/ "\">Next page</a></div>";
                 out.print(nextPage);
             }
 
             out.print("<div></div>");
 
-            if (objectCount > pageLimit) {
                 out.print("<div style=\"display: inline-block; width: 200px\">Shown products on page:</div>");
 
 
@@ -117,16 +122,16 @@
                     default: String color = "; color: indigo";
                 }
 
-                out.print("<span><a style=\" padding-left: 5px " + color3 + "\"  href=\"list?page_limit=3\">3</a></span>");
+                out.print("<span><a style=\" padding-left: 5px " + color3 + "\"  href=\"?page_limit=3\">3</a></span>");
                 out.print("<span> </span>");
-                out.print("<span><a style=\" padding-left: 5px " + color5 + "\"  href=\"list?page_limit=5\">5</a></span>");
+                out.print("<span><a style=\" padding-left: 5px " + color5 + "\"  href=\"?page_limit=5\">5</a></span>");
                 out.print("<span> </span>");
-                out.print("<span><a style=\" padding-left: 5px " + color10 + "\"  href=\"list?page_limit=10\">10</a></span>");
+                out.print("<span><a style=\" padding-left: 5px " + color10 + "\"  href=\"?page_limit=10\">10</a></span>");
 
                 out.print("</div>");
-            }
 
-        }
+
+
 
     %>
 

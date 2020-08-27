@@ -110,10 +110,8 @@ public class AnnouncementController extends WebController {
 
 
         if (hasQuery(req, "list_by")) {
-
             String querySearch = getQueryValue(req, "list_by");
             Object sessionSearch = getSession(req, "list_by");
-
             if (!querySearch.equals(sessionSearch)) {
                 setSession(req, "search_key", null);
             }
@@ -123,7 +121,6 @@ public class AnnouncementController extends WebController {
 
 
         if (listBy.equals("ad")) {
-
             String countSQL = "SELECT COUNT(DISTINCT ad__employee.ad_id) AS entry_count " +
                     "FROM ad__employee, details, users, ad " +
                     "WHERE ad__employee.is_active=1";
@@ -133,10 +130,9 @@ public class AnnouncementController extends WebController {
             String searchCondition = "ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id AND details.company_name";
 
             setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
+        }
 
-        } if (listBy.equals("employee")) {
-//            setSession(req, "collection", null);
-
+        if (listBy.equals("employee")) {
             String countSQL = "SELECT COUNT(DISTINCT ad__employee.user_id) AS entry_count " +
                     "FROM ad__employee, details, users, ad " +
                     "WHERE ad__employee.is_active=1 AND ad__employee.user_id=details.user_id";
@@ -146,10 +142,35 @@ public class AnnouncementController extends WebController {
             String searchCondition = "details.full_name";
 
             setCollectionInSession(req, DetailsEmployee.class, countSQL, adCollectionSQL, searchCondition);
-
         }
-        display(req, resp, PageMap.HR_LIST_PAGE);
 
+        display(req, resp, PageMap.HR_LIST_PAGE);
+    }
+
+    @MVCRouteMethod(path = "/announcement/list_hr", method = "GET")
+    @RoleAccess(role = 2)
+    public void listAppliedAds(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute announcement/list_hr");
+
+        int employeeId = (hasQuery(req, "employee_id")) ? getEmployeeIdFromQuery(req) : Integer.parseInt(getSession(req, "employee_id") + "");
+        setSession(req, "employee_id", employeeId);
+
+        String countSQL = "SELECT COUNT(*) AS entry_count " +
+                "FROM ad__employee " +
+                "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId;
+        String adCollectionSQL = "SELECT ad__employee.ad_id AS id, ad.employer_id AS employer_id, ad.title, details.company_name AS company_name, ad.description " +
+                "FROM ad__employee, ad, details " +
+                "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId + " AND ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id";
+        String searchCondition = "ad.title";
+
+        setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
+        String detailsCollectionSql = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education " +
+                                "FROM details " +
+                                "WHERE details.user_id=" + employeeId;
+        DetailsEmployee employeeDetails = DetailsEmployee.fetchEmployeeDetailsSQL(detailsCollectionSql).get(0);
+
+
+        display(req, resp, PageMap.HR_APPLIED_ADS_PAGE);
     }
 
     @MVCRouteMethod(path = "/announcement/list", method = "GET")
@@ -247,7 +268,6 @@ public class AnnouncementController extends WebController {
             if (!Ad.isAdBelongsToAuthEmployer(adId)) {
                 setSession(req, "ad", null);
                 display(req, resp, PageMap.DETAILS_AD_PAGE);
-//                redirect(resp, PageMap.PAGE_NOT_FOUND);
                 return;
             }
         }
@@ -260,8 +280,6 @@ public class AnnouncementController extends WebController {
         System.out.println("status: " + status);
 
         display(req, resp, PageMap.DETAILS_AD_PAGE);
-
-//        redirect(resp, PageMap.DASHBOARD_PAGE);
     }
 
     private int getPageLimit(HttpServletRequest req) {
@@ -272,15 +290,6 @@ public class AnnouncementController extends WebController {
         pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req, "page_limit")) : pageLimit;
         return pageLimit;
     }
-
-    /*private int getPageIndex(HttpServletRequest req) {
-        int pageIndex = 1;
-        if (getSession(req, "page_index") != null) {
-            pageIndex = Integer.parseInt(getSession(req, "page_index").toString());
-        }
-        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req, "page_index")) : pageIndex;
-        return pageIndex;
-    }*/
 
     private int getPageIndex(HttpServletRequest req, int objectCount, int pageLimit) {
         int pageIndex = 1;
@@ -314,19 +323,18 @@ public class AnnouncementController extends WebController {
         } catch (Exception e) {
             adId = 1;
         }
-//        int adId = (!hasQuery(req, "ad_id")) ? 1 : Integer.parseInt(getQueryValue(req,"ad_id"));
         return adId;
     }
 
-    /*private String getSearchKeyFromQuery(HttpServletRequest req) {
-        String searchKey;
+    private int getEmployeeIdFromQuery(HttpServletRequest req) {
+        int employeeId;
         try {
-            searchKey = getQueryValue(req, "search_key");
+            employeeId = Integer.parseInt(getQueryValue(req, "employee_id"));
         } catch (Exception e) {
-            searchKey = null;
+            employeeId = 0;
         }
-        return searchKey;
-    }*/
+        return employeeId;
+    }
 
     private int getPageOffset(HttpServletRequest req, int adCount, int pageLimit) {
         int pageIndex = getPageIndex(req, adCount, pageLimit);
@@ -334,7 +342,7 @@ public class AnnouncementController extends WebController {
         return offset;
     }
 
-    private void setCollectionInSession(HttpServletRequest req, Class classReference, String countSQL, String adCollectionSQL, String searchCondition) {
+    private void setCollectionInSession(HttpServletRequest req, Class classReference, String countSQL, String collectionSQL, String searchCondition) {
 
         String searchKey = getSearchKey(req);
         ArrayList<?> collection = null;
@@ -346,41 +354,38 @@ public class AnnouncementController extends WebController {
 
         if (searchKey != null) {
             setSession(req, "search_key", searchKey);
-
             if (classReference.equals(Ad.class)){
                 objectCount = Ad.getCountSQL(countSQL + " AND " + searchCondition + " LIKE '%" + searchKey + "%'");
                 System.out.println("Count(like): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
-                collection = Ad.fetchAdSQL(adCollectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
+                collection = Ad.fetchAdSQL(collectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
             }
             if (classReference.equals(DetailsEmployee.class)) {
                 objectCount = DetailsEmployee.getCountSQL(countSQL + " AND " + searchCondition + " like '%" + searchKey + "%'");
                 System.out.println("Count(like): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
-                collection = DetailsEmployee.fetchEmployeeDetailsSQL(adCollectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
+                collection = DetailsEmployee.fetchEmployeeDetailsSQL(collectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
             }
         } else {
             setSession(req, "search_key", null);
-
             if (classReference.equals(Ad.class)){
                 objectCount = Ad.getCountSQL(countSQL);
                 System.out.println("Count(like): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
-                collection = Ad.fetchAdSQL(adCollectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
+                collection = Ad.fetchAdSQL(collectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
             }
             if (classReference.equals(DetailsEmployee.class)) {
                 objectCount = DetailsEmployee.getCountSQL(countSQL);
                 System.out.println("Count(like): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
-                collection = DetailsEmployee.fetchEmployeeDetailsSQL(adCollectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
+                collection = DetailsEmployee.fetchEmployeeDetailsSQL(collectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
             }
         }
 
-        setSession(req, "object_count", objectCount);
-
         int pageIndex = getPageIndex(req, objectCount, pageLimit);
-        setSession(req, "page_index", pageIndex);
+        setSession(req, "object_count", objectCount);
         setSession(req, "page_limit", pageLimit);
+        setSession(req, "page_index", pageIndex);
         setSession(req, "collection", collection);
     }
 
