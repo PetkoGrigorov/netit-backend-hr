@@ -29,7 +29,7 @@ public class Database {
         }
     }
 
-    public Database sqlSelect(String query) {
+    public Database sqlQuery(String query) {
         this.queryBuilder = query;
         return this;
     }

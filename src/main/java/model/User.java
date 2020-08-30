@@ -103,7 +103,7 @@ public class User {
 
 
     public static int getCountSQL(String countSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(countSQL)
                 .printQueryBuilder().fetch();
         while (true) {
             try {
@@ -117,7 +117,7 @@ public class User {
     }
 
     public static ArrayList<User> fetchUserSQL(String adCollectionSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(adCollectionSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(adCollectionSQL)
                 .printQueryBuilder().fetch();
         ArrayList<User> adCollection = new ArrayList<>();
         while (true) {

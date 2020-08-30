@@ -80,7 +80,7 @@ public class DetailsEmployer {
     }
 
     public static int getCountSQL(String countSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(countSQL)
                 .printQueryBuilder().fetch();
         while (true) {
             try {
@@ -94,7 +94,7 @@ public class DetailsEmployer {
     }
 
     public static ArrayList<DetailsEmployer> fetchEmployerDetailsSQL(String employerCollectionSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(employerCollectionSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(employerCollectionSQL)
                 .printQueryBuilder().fetch();
         ArrayList<DetailsEmployer> adCollection = new ArrayList<>();
         while (true) {

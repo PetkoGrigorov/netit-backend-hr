@@ -87,7 +87,7 @@ public class DetailsEmployee {
     }
 
     public static int getCountSQL(String countSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(countSQL)
                 .printQueryBuilder().fetch();
         while (true) {
             try {
@@ -111,7 +111,7 @@ public class DetailsEmployee {
     }
 
     public static ArrayList<DetailsEmployee> fetchEmployeeDetailsSQL(String employeeCollectionSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(employeeCollectionSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(employeeCollectionSQL)
                 .printQueryBuilder().fetch();
         ArrayList<DetailsEmployee> adCollection = new ArrayList<>();
         while (true) {

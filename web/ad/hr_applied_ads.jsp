@@ -3,6 +3,7 @@
 <%@ page import="model.system.Auth" %>
 <%@ page import="model.DetailsEmployer" %>
 <%@ page import="model.DetailsEmployee" %>
+<%@ page import="config.SessionKey" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <jsp:include page="../content/header.jsp"></jsp:include>
@@ -24,7 +25,8 @@
 
         int employeeId;
         try {
-            employeeId = Integer.parseInt(request.getSession().getAttribute("employee_id").toString());
+            employeeId = Integer.parseInt(request.getSession().getAttribute(SessionKey.EMPLOYEE_ID).toString());
+
         } catch (Exception e) {
             employeeId = 0;
         }
@@ -34,23 +36,25 @@
             String detailsCollectionSql = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education " +
                     "FROM details " +
                     "WHERE details.user_id=" + employeeId;
-            DetailsEmployee employeeDetails = DetailsEmployee.fetchEmployeeDetailsSQL(detailsCollectionSql).get(0);
+            DetailsEmployee employeeDetails = (DetailsEmployee) request.getSession().getAttribute(SessionKey.EMPLOYEE_DETAILS);
+            out.print("<h2>");
             out.print("<div>ID: " + employeeDetails.getUserId() + "</div>");
             out.print("<div>Full name: " + employeeDetails.getFullName() + "</div>");
             out.print("<div>Age: " + employeeDetails.getAge() + "</div>");
             out.print("<div>Town: " + employeeDetails.getTown() + "</div>");
             out.print("<div>Education: " + employeeDetails.getEducation() + "</div>");
+            out.print("</h2>");
             out.print("<hr>");
 
 
-            out.print("<h2>Ads</h2>");
+            out.print("<h2>Applied Ads by " + employeeDetails.getFullName() + "</h2>");
             ArrayList<Ad> collection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
             for (Ad ad : collection) {
                 int adId = ad.getId();
                 out.print("<div>ID: " + adId + "</div>");
                 out.print("<div>Title: " + ad.getTitle() + "</div>");
                 out.print("<div>Company Name: " + ad.getEmployerName() + "</div>");
-                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details?ad_id=" + ad.getId() + "\">Details</a></div>");
+                out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details_hr?ad_id=" + ad.getId() + "\">Details</a></div>");
                 out.print("<hr>");
             }
 

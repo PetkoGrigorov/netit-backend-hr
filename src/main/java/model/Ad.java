@@ -191,6 +191,14 @@ public class Ad {
         return null;
     }
 
+    public static void updateStatus(int adId, int userId, int status) {
+        String query = "UPDATE  ad__employee SET status=" + status +
+                    " WHERE ad__employee.is_active=1 " +
+                    " AND ad__employee.ad_id=" + adId +
+                    " AND ad__employee.user_id=" + userId;
+        Database.getInstance().sqlQuery(query).printQueryBuilder().execute();
+    }
+
     public static void create(final int employerId, final String title, final String description) {
         Database.getInstance().insert("ad", new HashMap<String, Object>() {{
             put("employer_id", employerId);
@@ -362,7 +370,7 @@ public class Ad {
     }
 
     public static int getCountSQL(String countSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(countSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(countSQL)
                 .printQueryBuilder().fetch();
         while (true) {
             try {
@@ -391,7 +399,7 @@ public class Ad {
     }*/
 
     public static ArrayList<Ad> fetchAdSQL(String adCollectionSQL) {
-        ResultSet resultSet = Database.getInstance().sqlSelect(adCollectionSQL)
+        ResultSet resultSet = Database.getInstance().sqlQuery(adCollectionSQL)
                 .printQueryBuilder().fetch();
         ArrayList<Ad> adCollection = new ArrayList<>();
         while (true) {
