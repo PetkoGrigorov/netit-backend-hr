@@ -11,6 +11,7 @@ public interface PageMap {
     String CREATE_AD_PAGE = "/ad/create.jsp";
     String UPDATE_AD_PAGE = "/ad/update.jsp";
     String DETAILS_AD_PAGE = "/ad/details.jsp";
+    String DETAILS_MESSAGE_PAGE = "/message/details.jsp";
     String HR_LIST_PAGE = "/ad/hr_list.jsp";
     String HR_APPLIED_ADS_PAGE = "/ad/hr_applied_ads.jsp";
 

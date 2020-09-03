@@ -47,24 +47,16 @@ public class AuthController extends WebController {
         String authUserName = null;
         int userRole = authUser.getRole();
         if (userRole == 2) {
-            authUserName = DetailsHr.fetchDetails(authUser.getId()).getFullName();
-            setSession(req,"auth_user", "HR: " + authUserName);
-            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
-            return;
+            authUserName = "HR: " + DetailsHr.fetchDetails(authUser.getId()).getFullName();
         }
         if (userRole == 3) {
             authUserName = DetailsEmployer.fetchDetails(authUser.getId()).getCompanyName();
-            setSession(req,"auth_user", authUserName);
-            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
-            return;
         }
         if (userRole == 4) {
             authUserName = DetailsEmployee.fetchDetails(authUser.getId()).getFullName();
-            setSession(req,"auth_user", authUserName);
-            redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
         }
-//        setSession(req,"auth_user", authUserName);
-//        redirect(resp, RouteMap.HOME);
+        setSession(req,"auth_user", authUserName);
+        redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
 
     }
 

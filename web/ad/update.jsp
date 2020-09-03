@@ -25,6 +25,9 @@
     </form>
 
 
+    <a href="/Jobser_war2/base/announcement/list">List</a>
+
+
 
 </div>
 

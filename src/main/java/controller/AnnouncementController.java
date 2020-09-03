@@ -104,32 +104,35 @@ public class AnnouncementController extends WebController {
     @RoleAccess(role = 2)
     public void listRole2(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole2");
-        if (!hasQuery(req, "list_by") && getSession(req, "list_by") == null) {
+        showRequestParam(req);
+
+        if (!hasQuery(req, SessionKey.LIST_BY) && getSession(req, SessionKey.LIST_BY) == null) {
             display(req, resp, PageMap.HR_LIST_PAGE);
             return;
         }
-        String listBy = (hasQuery(req, "list_by")) ? getQueryValue(req, "list_by") : getSession(req, "list_by").toString();
 
-
-        if (hasQuery(req, "list_by")) {
-            String querySearch = getQueryValue(req, "list_by");
-            Object sessionSearch = getSession(req, "list_by");
-            if (!querySearch.equals(sessionSearch)) {
-                setSession(req, "search_key", null);
+        String listBy;
+        if (hasQuery(req, SessionKey.LIST_BY)) {
+            listBy = getQueryValue(req, SessionKey.LIST_BY);
+            Object sessionListBy = getSession(req, SessionKey.LIST_BY);
+            if (!listBy.equals(sessionListBy)) {
+                setSession(req, SessionKey.SEARCH_KEY, null);
             }
+            setSession(req, SessionKey.LIST_BY, listBy);
+        } else {
+            listBy = getSession(req, SessionKey.LIST_BY).toString();
         }
-
-        setSession(req, "list_by", listBy);
-
 
         if (listBy.equals("ad")) {
             String countSQL = "SELECT COUNT(DISTINCT ad__employee.ad_id) AS entry_count " +
-                    "FROM ad__employee, details, users, ad " +
-                    "WHERE ad__employee.is_active=1";
+                    "FROM ad__employee, details, users, ad" +
+                    " WHERE ad__employee.is_active=1" +
+                    " AND ad__employee.ad_id=ad.id" +
+                    " AND ad.employer_id=details.user_id";
             String adCollectionSQL = "SELECT DISTINCT ad__employee.ad_id AS id, ad.employer_id AS employer_id, ad.title, details.company_name AS company_name, ad.description " +
                     "FROM ad__employee, ad, details, users " +
                     "WHERE ad__employee.is_active=1 AND ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id";
-            String searchCondition = "ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id AND details.company_name";
+            String searchCondition = "details.company_name";
 
             setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
         }
@@ -146,37 +149,69 @@ public class AnnouncementController extends WebController {
             setCollectionInSession(req, DetailsEmployee.class, countSQL, adCollectionSQL, searchCondition);
         }
 
-        setSession(req, "current_controller", "/list");
+        setSession(req, SessionKey.CURRENT_CONTROLLER, "/list");
 
         display(req, resp, PageMap.HR_LIST_PAGE);
     }
 
     @MVCRouteMethod(path = "/announcement/list_hr", method = "GET")
     @RoleAccess(role = 2)
-    public void listAppliedAds(HttpServletRequest req, HttpServletResponse resp) {
+    public void listAppliedAdsEmployees(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/list_hr");
+        showRequestParam(req);
 
-        int employeeId = (hasQuery(req, "employee_id")) ? getEmployeeIdFromQuery(req) : Integer.parseInt(getSession(req, "employee_id") + "");
-        setSession(req, SessionKey.EMPLOYEE_ID, employeeId);
-        System.out.println("employee id: " + employeeId);
+        if (getSession(req, "list_by").equals("employee")) {
 
-        String countSQL = "SELECT COUNT(*) AS entry_count " +
-                "FROM ad__employee " +
-                "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId;
-        String adCollectionSQL = "SELECT ad__employee.ad_id AS id, ad.employer_id AS employer_id, ad.title, details.company_name AS company_name, ad.description " +
-                "FROM ad__employee, ad, details " +
-                "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId + " AND ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id";
-        String searchCondition = "ad.title";
+            int employeeId = (hasQuery(req, SessionKey.EMPLOYEE_ID)) ? getEmployeeIdFromQuery(req) : Integer.parseInt(getSession(req, SessionKey.EMPLOYEE_ID) + "");
+            setSession(req, SessionKey.EMPLOYEE_ID, employeeId);
+            System.out.println("employee id: " + employeeId);
 
-        setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
-        String detailsCollectionSql = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education " +
-                                "FROM details " +
-                                "WHERE details.user_id=" + employeeId;
-        DetailsEmployee employeeDetails = DetailsEmployee.fetchEmployeeDetailsSQL(detailsCollectionSql).get(0);
-        setSession(req, SessionKey.EMPLOYEE_DETAILS, employeeDetails);
+            String countSQL = "SELECT COUNT(*) AS entry_count " +
+                    "FROM ad__employee " +
+                    "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId;
+            String adCollectionSQL = "SELECT ad__employee.ad_id AS id, ad.employer_id AS employer_id, ad.title, details.company_name AS company_name, ad.description " +
+                    "FROM ad__employee, ad, details " +
+                    "WHERE ad__employee.is_active=1 AND ad__employee.user_id=" + employeeId + " AND ad__employee.ad_id=ad.id AND details.user_id=ad.employer_id";
+            String searchCondition = "ad.title";
 
-        setSession(req, SessionKey.CURRENT_CONTROLLER, "/list_hr");
+            setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
+            String detailsCollectionSql = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education " +
+                    "FROM details " +
+                    "WHERE details.user_id=" + employeeId;
+            DetailsEmployee employeeDetails = DetailsEmployee.fetchEmployeeDetailsSQL(detailsCollectionSql).get(0);
+            setSession(req, SessionKey.EMPLOYEE_DETAILS, employeeDetails);
+
+            setSession(req, SessionKey.CURRENT_CONTROLLER, "/list_hr");
+        }
+
+        if (getSession(req, "list_by").equals("ad")) {
+
+            int adId = getAdIdFromQueryOrSession(req);
+            setSession(req, SessionKey.AD_ID, adId);
+
+            String countSQL = "SELECT COUNT(*) AS entry_count " +
+                    "FROM ad__employee " +
+                    "WHERE ad__employee.is_active=1 AND ad__employee.ad_id=" + adId;
+            String employeeCollectionSQL = "SELECT details.id, ad__employee.user_id, details.full_name, details.age, details.town, details.education " +
+                    "FROM ad__employee, details " +
+                    "WHERE ad__employee.is_active=1 AND ad__employee.ad_id=" + adId + " AND ad__employee.user_id=details.user_id";
+            String searchCondition = "details.full_name";
+            setCollectionInSession(req, DetailsEmployee.class, countSQL, employeeCollectionSQL, searchCondition);
+
+            String adCollectionSql = "SELECT ad.id, ad.employer_id, ad.title, details.company_name, ad.description " +
+                    "FROM ad, details " +
+                    "WHERE ad.employer_id=details.user_id AND ad.id=" + adId;
+            ;
+            Ad ad = Ad.fetchAdSQL(adCollectionSql).get(0);
+            setSession(req, SessionKey.AD, ad);
+
+            setSession(req, SessionKey.CURRENT_CONTROLLER, "/list_hr");
+
+
+        }
+
         display(req, resp, PageMap.HR_APPLIED_ADS_PAGE);
+
     }
 
     @MVCRouteMethod(path = "/announcement/list", method = "GET")
@@ -206,7 +241,7 @@ public class AnnouncementController extends WebController {
         setSession(req, "page_limit", pageLimit);
         ArrayList<Ad> adCollection = Ad.fetchAllByAuthEmployer(pageLimit, offset);
         setSession(req, "collection", adCollection);*/
-        setSession(req, "current_controller", "/list");
+        setSession(req, SessionKey.CURRENT_CONTROLLER, "/list");
         display(req, resp, PageMap.OWN_LIST_PAGE);
     }
 
@@ -214,6 +249,9 @@ public class AnnouncementController extends WebController {
     @RoleAccess(role = 4)
     public void listRole4(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole4");
+        showRequestParam(req);
+
+        setSession(req, SessionKey.EMPLOYEE_ID, Auth.getAuthenticatedUser().getId());
 
         String countSQL = "SELECT COUNT(*) AS entry_count " +
                 "FROM ad, details " +
@@ -225,7 +263,6 @@ public class AnnouncementController extends WebController {
         String searchCondition = "company_name";
 
         setCollectionInSession(req, Ad.class, countSQL, adCollectionSQL, searchCondition);
-
 
         /*int pageLimit = getPageLimit(req);
         String searchKey = getSearchKey(req);
@@ -252,7 +289,7 @@ public class AnnouncementController extends WebController {
         setSession(req, "page_limit", pageLimit);
 
         setSession(req, "collection", adCollection);*/
-        setSession(req, "current_controller", "/list");
+        setSession(req, SessionKey.CURRENT_CONTROLLER, "/list");
         display(req, resp, PageMap.DASHBOARD_PAGE);
     }
 
@@ -270,7 +307,7 @@ public class AnnouncementController extends WebController {
     public void details(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/details");
 
-        int adId = getAdIdFromQuery(req);
+        int adId = getAdIdFromQueryOrSession(req);
 
         if (Auth.getAuthenticatedUser().getRole() == 3) {
             if (!Ad.isAdBelongsToAuthEmployer(adId)) {
@@ -281,10 +318,11 @@ public class AnnouncementController extends WebController {
         }
 
         Ad ad = Ad.fetchAd(adId);
-        setSession(req, "ad", ad);
+        setSession(req, SessionKey.AD, ad);
+        setSession(req, SessionKey.AD_ID, adId);
 
         String status = Ad.fetchStatus(adId, Auth.getAuthenticatedUser().getId());
-        setSession(req, "status", status);
+        setSession(req, SessionKey.STATUS, status);
         System.out.println("status: " + status);
 
         String messageCollectionSQL = "SELECT id, ad_id, employee_id, value" +
@@ -295,7 +333,7 @@ public class AnnouncementController extends WebController {
 
         ArrayList<Message> messageCollection = Message.fetchMessageSQL(messageCollectionSQL);
         setSession(req, SessionKey.MESSAGE, messageCollection);
-
+        setSession(req, SessionKey.CURRENT_CONTROLLER, "/details");
         display(req, resp, PageMap.DETAILS_AD_PAGE);
     }
 
@@ -303,48 +341,79 @@ public class AnnouncementController extends WebController {
     @RoleAccess(role = 2)
     public void detailsForHr(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/detailsForHr");
+        showRequestParam(req);
 
-        int adId = getAdIdFromQuery(req);
-        setSession(req, SessionKey.AD_ID, adId);
+        if (getSession(req, SessionKey.LIST_BY).equals("employee")) {
 
-        Ad ad = Ad.fetchAd(adId);
-        setSession(req, SessionKey.AD, ad);
+            int adId = getAdIdFromQueryOrSession(req);
+            setSession(req, SessionKey.AD_ID, adId);
+//            int employeeId = getEmployeeIdFromQueryOrSession(req);
 
-        int employeeId;
-        try {
-            employeeId = Integer.parseInt(getSession(req, SessionKey.EMPLOYEE_ID) + "");
+            messageAndStatusAd(req);
 
-        } catch (Exception e) {
-            employeeId = 0;
+//            int adId = getAdIdFromQuery(req);
+//            setSession(req, SessionKey.AD_ID, adId);
+
+            Ad ad = Ad.fetchAd(adId);
+            setSession(req, SessionKey.AD, ad);
+
+//            int employeeId;
+//            try {
+//                employeeId = Integer.parseInt(getSession(req, SessionKey.EMPLOYEE_ID) + "");
+//
+//            } catch (Exception e) {
+//                employeeId = 0;
+//            }
+//
+//            if (req.getParameter("status") != null) {
+//                int paramStatus = Integer.parseInt(req.getParameter("status"));
+//                System.out.println("input status: " + paramStatus);
+//                Ad.updateStatus(adId, employeeId, paramStatus);
+//            }
+//
+//            if (req.getParameter("ad_message") != null) {
+//                String message = req.getParameter("ad_message");
+//                System.out.println("new message: " + message);
+//                Message.createMessage(adId, employeeId, message);
+//            }
+//
+//            String messageCollectionSQL = "SELECT id, ad_id, employee_id, value" +
+//                    " FROM messages" +
+//                    " WHERE is_active=1" +
+//                    " AND ad_id=" + adId +
+//                    " AND employee_id=" + employeeId;
+//
+//            ArrayList<Message> messageCollection = Message.fetchMessageSQL(messageCollectionSQL);
+//            setSession(req, SessionKey.MESSAGE, messageCollection);
+//
+//            String status = Ad.fetchStatus(adId, employeeId);
+//            setSession(req, SessionKey.STATUS, status);
+//            System.out.println("status: " + status);
+//            System.out.println("ad id: " + adId);
+//            System.out.println("employee id :" + employeeId);
+
+
         }
 
-        if (req.getParameter("status") != null) {
-            int paramStatus = Integer.parseInt(req.getParameter("status"));
-            System.out.println("input status: " + paramStatus);
-            Ad.updateStatus(adId, employeeId, paramStatus);
+        if (getSession(req, SessionKey.LIST_BY).equals("ad")) {
+
+            int employeeId = getEmployeeIdFromQueryOrSession(req);
+//            int adId = getAdIdFromQueryOrSession(req);
+
+            setSession(req, SessionKey.EMPLOYEE_ID, employeeId);
+
+            messageAndStatusAd(req);
+
+            DetailsEmployee employeeDetails = DetailsEmployee.fetchDetails(employeeId);
+            setSession(req, SessionKey.EMPLOYEE_DETAILS, employeeDetails);
+
+
+
         }
 
-        if (req.getParameter("ad_message") != null) {
-            String message = req.getParameter("ad_message");
-            System.out.println("new message: " + message);
-            Message.createMessage(adId, employeeId, message);
-        }
+//        --------------------------------------
 
-        String messageCollectionSQL = "SELECT id, ad_id, employee_id, value" +
-                                    " FROM messages" +
-                                    " WHERE is_active=1" +
-                                    " AND ad_id=" + adId +
-                                    " AND employee_id=" + employeeId;
-
-        ArrayList<Message> messageCollection = Message.fetchMessageSQL(messageCollectionSQL);
-        setSession(req, SessionKey.MESSAGE, messageCollection);
-
-        String status = Ad.fetchStatus(adId, employeeId);
-        setSession(req, SessionKey.STATUS, status);
-        System.out.println("status: " + status);
-        System.out.println("ad id: " + adId);
-        System.out.println("employee id :" + employeeId);
-
+        setSession(req, SessionKey.CURRENT_CONTROLLER, "/details_hr");
         display(req, resp, PageMap.DETAILS_AD_PAGE);
     }
 
@@ -374,11 +443,9 @@ public class AnnouncementController extends WebController {
     }
 
     private String getSearchKey(HttpServletRequest req) {
-        String searchKey = null;
-        if (getSession(req, "search_key") != null) {
-            searchKey = getSession(req, "search_key").toString();
-        }
-        searchKey = (hasQuery(req, "search_key")) ? getQueryValue(req, "search_key") : searchKey;
+        String searchKey;
+        searchKey = (getSession(req, SessionKey.SEARCH_KEY) != null) ? getSession(req, SessionKey.SEARCH_KEY).toString() : null;
+        searchKey = (hasQuery(req, SessionKey.SEARCH_KEY)) ? getQueryValue(req, SessionKey.SEARCH_KEY) : searchKey;
         return searchKey;
     }
 
@@ -392,13 +459,27 @@ public class AnnouncementController extends WebController {
         return adId;
     }
 
+    private int getAdIdFromQueryOrSession(HttpServletRequest req) {
+        int adId;
+        adId = (getSession(req, SessionKey.AD_ID) != null) ? (int) getSession(req, SessionKey.AD_ID) : 0;
+        adId = (hasQuery(req, SessionKey.AD_ID)) ? getAdIdFromQuery(req) : adId;
+        return adId;
+    }
+
     private int getEmployeeIdFromQuery(HttpServletRequest req) {
         int employeeId;
         try {
-            employeeId = Integer.parseInt(getQueryValue(req, "employee_id"));
+            employeeId = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
         } catch (Exception e) {
             employeeId = 0;
         }
+        return employeeId;
+    }
+
+    private int getEmployeeIdFromQueryOrSession(HttpServletRequest req) {
+        int employeeId;
+        employeeId = (getSession(req, SessionKey.EMPLOYEE_ID) != null) ? (int) getSession(req, SessionKey.EMPLOYEE_ID) : 0;
+        employeeId = (hasQuery(req, SessionKey.EMPLOYEE_ID)) ? getEmployeeIdFromQuery(req) : employeeId;
         return employeeId;
     }
 
@@ -411,20 +492,27 @@ public class AnnouncementController extends WebController {
     private void setCollectionInSession(HttpServletRequest req, Class classReference, String countSQL, String collectionSQL, String searchCondition) {
 
         String searchKey = getSearchKey(req);
+        System.out.println("searchKey (got) in setCollectionInSession: " + searchKey);
+        setSession(req, SessionKey.SEARCH_KEY, searchKey);
+
         ArrayList<?> collection = null;
         int objectCount = 0;
         int pageLimit = getPageLimit(req);
         int pageOffset = 0;
 
-        System.out.println("search string: " + searchKey);
+        if (req.getPathInfo().equals("/announcement/list_hr")) {
+            searchKey = null;
+        }
+
+        System.out.println("searchKey (used) in setCollectionInSession: " + searchKey);
 
         if (searchKey != null) {
-            setSession(req, "search_key", searchKey);
-            if (classReference.equals(Ad.class)){
+
+            if (classReference.equals(Ad.class)) {
                 objectCount = Ad.getCountSQL(countSQL + " AND " + searchCondition + " LIKE '%" + searchKey + "%'");
                 System.out.println("Count(like): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
-                collection = Ad.fetchAdSQL(collectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
+                collection = Ad.fetchAdSQL(collectionSQL + " AND " + searchCondition + " LIKE '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
             }
             if (classReference.equals(DetailsEmployee.class)) {
                 objectCount = DetailsEmployee.getCountSQL(countSQL + " AND " + searchCondition + " like '%" + searchKey + "%'");
@@ -433,16 +521,15 @@ public class AnnouncementController extends WebController {
                 collection = DetailsEmployee.fetchEmployeeDetailsSQL(collectionSQL + " AND " + searchCondition + " like '%" + searchKey + "%' LIMIT " + pageOffset + ", " + pageLimit);
             }
         } else {
-            setSession(req, "search_key", null);
-            if (classReference.equals(Ad.class)){
+            if (classReference.equals(Ad.class)) {
                 objectCount = Ad.getCountSQL(countSQL);
-                System.out.println("Count(like): " + objectCount);
+                System.out.println("Count(all): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
                 collection = Ad.fetchAdSQL(collectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
             }
             if (classReference.equals(DetailsEmployee.class)) {
                 objectCount = DetailsEmployee.getCountSQL(countSQL);
-                System.out.println("Count(like): " + objectCount);
+                System.out.println("Count(all): " + objectCount);
                 pageOffset = getPageOffset(req, objectCount, pageLimit);
                 collection = DetailsEmployee.fetchEmployeeDetailsSQL(collectionSQL + " LIMIT " + pageOffset + ", " + pageLimit);
             }
@@ -455,5 +542,37 @@ public class AnnouncementController extends WebController {
         setSession(req, "collection", collection);
     }
 
+    private void messageAndStatusAd(HttpServletRequest req) {
+
+        int employeeId = getEmployeeIdFromQueryOrSession(req);
+        int adId = getAdIdFromQueryOrSession(req);
+
+        if (req.getParameter("status") != null) {
+            int paramStatus = Integer.parseInt(req.getParameter(SessionKey.STATUS));
+            System.out.println("input status: " + paramStatus);
+            Ad.updateStatus(adId, employeeId, paramStatus);
+        }
+
+        if (req.getParameter("ad_message") != null) {
+            String message = req.getParameter(SessionKey.AD_MESSAGE);
+            System.out.println("new message: " + message);
+            Message.createMessage(adId, employeeId, message);
+        }
+
+        String messageCollectionSQL = "SELECT id, ad_id, employee_id, value" +
+                " FROM messages" +
+                " WHERE is_active=1" +
+                " AND ad_id=" + adId +
+                " AND employee_id=" + employeeId;
+
+        ArrayList<Message> messageCollection = Message.fetchMessageSQL(messageCollectionSQL);
+        setSession(req, SessionKey.MESSAGE, messageCollection);
+
+        String status = Ad.fetchStatus(adId, employeeId);
+        setSession(req, SessionKey.STATUS, status);
+        System.out.println("status: " + status);
+        System.out.println("ad id: " + adId);
+        System.out.println("employee id :" + employeeId);
+    }
 
 }

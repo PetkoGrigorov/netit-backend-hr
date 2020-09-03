@@ -3,6 +3,7 @@
 <%@ page import="model.system.Auth" %>
 <%@ page import="config.SessionKey" %>
 <%@ page import="model.Message" %>
+<%@ page import="model.DetailsEmployee" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 
@@ -15,12 +16,14 @@
 
     <%
     Ad ad = (Ad) request.getSession().getAttribute(SessionKey.AD);
+        int authUserRole = Auth.getAuthenticatedUser().getRole();
         if (ad != null) {
             int adId = ad.getId();
             out.print("<div>ID: " + adId + "</div>");
+            out.print("<div>Title: " + ad.getTitle() + "</div>");
+            out.print("<div>Company name: " + ad.getEmployerName() + "</div>");
             out.print("<div>Description: " + ad.getDescription() + "</div>");
             out.print("<hr>");
-            int authUserRole = Auth.getAuthenticatedUser().getRole();
 
             int employeeId;
             try {
@@ -31,6 +34,18 @@
             }
 
             if (authUserRole == 2) {
+
+                out.print("<div><h2>Employee Details</h2></div>");
+
+                DetailsEmployee employeeDetails = (DetailsEmployee) request.getSession().getAttribute(SessionKey.EMPLOYEE_DETAILS);
+                out.print("<div>ID: " + employeeDetails.getUserId() + "</div>");
+                out.print("<div>Full name: " + employeeDetails.getFullName() + "</div>");
+                out.print("<div>Age: " + employeeDetails.getAge() + "</div>");
+                out.print("<div>Town: " + employeeDetails.getTown() + "</div>");
+                out.print("<div>Education: " + employeeDetails.getEducation() + "</div>");
+                out.print("<hr>");
+
+
                 out.print("<div style=\"color: green\">Status: " + request.getSession().getAttribute(SessionKey.STATUS) + "</div>");
                 out.print("<div style=\"color: crimson\">Update Status: </div>");
                 out.print(" <form style=\"color: crimson\">\n" +
@@ -68,7 +83,7 @@
                     out.print("<div>Messages:</div>");
                     for (Message message : messageArrayList) {
                         out.print("<div>ID: " + message.getId() + "</div>");
-                        out.print("<div>Value: " + message.getValue() + "</div>");
+                        out.print("<div>Value: <a href=\"/Jobser_war2/base/message/details?message_id=" + message.getId() + "\">" + message.getValue() + "</a></div>");
                         out.print("<hr>");
                     }
                 }
@@ -76,12 +91,13 @@
 
         }
 
-        String sessionController = request.getSession().getAttribute("current_controller") + "";
-        out.print("<a href=\"/Jobser_war2/base/announcement" + sessionController + "\">List</a>");
+
+           out.print("<a href=\"/Jobser_war2/base/announcement/list\">List</a>");
+
+
     %>
 
 <%-- <a href="/Jobser_war2/base/announcement/list">List</a> --%>
-
 
 </div>
 
