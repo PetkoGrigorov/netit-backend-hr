@@ -1,6 +1,8 @@
 package framework;
 
+import config.PageMap;
 import config.SessionKey;
+import model.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -48,11 +50,11 @@ public class WebController {
 
     }
 
-    protected void setSession(HttpServletRequest req, String key, Object value) {
+    protected void setSessionAttribute(HttpServletRequest req, String key, Object value) {
         req.getSession().setAttribute(key, value);
     }
 
-    protected Object getSession(HttpServletRequest req, String key) {
+    protected Object getSessionAttribute(HttpServletRequest req, String key) {
         return req.getSession().getAttribute(key);
     }
 
@@ -82,6 +84,81 @@ public class WebController {
 
     protected String getQueryValue(HttpServletRequest req, String key) {
         return getQueryHashMap(req).get(key);
+    }
+
+    protected String getSearchKeyFromQueryOrSession(HttpServletRequest req) {
+        return  (hasQuery(req, SessionKey.SEARCH_KEY)) ? getQueryValue(req, SessionKey.SEARCH_KEY) :
+                                                        (String) getSessionAttribute(req, SessionKey.SEARCH_KEY);
+    }
+
+    protected String getListByFromQueryOrSession(HttpServletRequest req) {
+        return  (hasQuery(req, SessionKey.LIST_BY)) ? getQueryValue(req, SessionKey.LIST_BY) :
+                                                    (String) getSessionAttribute(req, SessionKey.LIST_BY);
+    }
+
+    protected int getAdIdFromQueryOrSession(HttpServletRequest req) {
+        int adId;
+        try {
+            adId = Integer.parseInt(getQueryValue(req, SessionKey.AD_ID));
+        } catch (Exception e) {
+            try {
+                adId = Integer.parseInt(getSessionAttribute(req, SessionKey.AD_ID) + "");
+            } catch (Exception e1) {
+                adId = 0;
+            }
+        }
+        return adId;
+    }
+
+    private int getEmployeeIdFromQuery(HttpServletRequest req) {
+        int employeeId;
+        try {
+            employeeId = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
+        } catch (Exception e) {
+            employeeId = 0;
+        }
+        return employeeId;
+    }
+
+    protected int getEmployeeIdFromQueryOrSession(HttpServletRequest req) {
+        int employeeId;
+
+//        employeeId = (getSessionAttribute(req, SessionKey.EMPLOYEE_ID) != null) ? (int) getSessionAttribute(req, SessionKey.EMPLOYEE_ID) : 0;
+//        employeeId = (hasQuery(req, SessionKey.EMPLOYEE_ID)) ? getEmployeeIdFromQuery(req) : employeeId;
+
+        try {
+            employeeId = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
+        } catch (Exception e) {
+            try {
+                employeeId = Integer.parseInt(getSessionAttribute(req, SessionKey.EMPLOYEE_ID) + "");
+            } catch (Exception e1) {
+                employeeId = 0;
+            }
+        }
+        return employeeId;
+    }
+
+    protected boolean isIdBelongsToEmployee(HttpServletRequest req) {
+            int id;
+            try {
+                id = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
+            } catch (Exception e) {
+                id = 0;
+            }
+
+            int role;
+            try {
+                User user = User.fetchUserById(id);
+                role = user.getRole();
+            } catch (Exception e) {
+                role = 0;
+            }
+
+            if (role != 4) {
+                return false;
+            } else {
+                return true;
+            }
     }
 
 

@@ -68,6 +68,22 @@ public class User {
         return user;
     }
 
+    public static  User fetchUserById(int id) throws SQLException {
+        User user = null;
+        ResultSet resultSet = Database.getInstance().selectAll("users")
+                .where("id", Database.Condition.EQUAL, id)
+                .andWhere("is_active", Database.Condition.EQUAL, 1)
+                .printQueryBuilder().fetch();
+        while (resultSet.next()){
+            user = new User(resultSet.getInt("id"),
+                    resultSet.getString("username"),
+                    resultSet.getString("password"),
+                    resultSet.getString("email"),
+                    resultSet.getInt("role"));
+        }
+        return user;
+    }
+
     public static boolean isUnique(final String column, Object value) throws SQLException {
         ResultSet resultSet = Database.getInstance().selectSome(new ArrayList<String>(){{add(column);}}, "users")
                             .printQueryBuilder().fetch();

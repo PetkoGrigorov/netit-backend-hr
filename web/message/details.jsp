@@ -17,12 +17,11 @@
             out.print("<hr>");
         }
 
-        int adId = (int) request.getSession().getAttribute(SessionKey.AD_ID);
+        int adId = Integer.parseInt(request.getSession().getAttribute(SessionKey.AD_ID) + "");
         int employeeId = (int) request.getSession().getAttribute(SessionKey.EMPLOYEE_ID);
-        String sessionController = request.getSession().getAttribute("current_controller") + "";
+        String sessionController = request.getSession().getAttribute(SessionKey.CURRENT_CONTROLLER) + "";
 
         String paramValue = "";
-
         if (Auth.getAuthenticatedUser().getRole() == 2) {
             if (request.getSession().getAttribute("list_by").equals("ad")) {
                 paramValue = "?employee_id=" + employeeId;

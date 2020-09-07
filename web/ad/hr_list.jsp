@@ -9,7 +9,7 @@
 
 <div id="body" style="background: khaki">
 
-    <h1>HR's List</h1>
+    <h1>HR's Dashboard</h1>
 
     <div>
         <a href="/Jobser_war2/base/announcement/list?list_by=ad">List by ad</a>
@@ -21,18 +21,18 @@
 
 
     <%
+        Object listBy = request.getSession().getAttribute("list_by");
 
-
-        if (request.getSession().getAttribute("list_by") != null) {
+        if (listBy != null && (listBy.equals("ad") || listBy.equals("employee"))) {
             out.print("<form>\n" +
                     "        <input type=\"text\" placeholder=\"search\" name=\"search_key\">\n" +
                     "        <input type=\"submit\">\n" +
                     "    </form>");
 
             int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());
-            out.print("<div>Count of selection: " + objectCount + "</div>");
+            out.print("<div>Count of selection: " + objectCount + "</div> <hr>");
 
-            if (request.getSession().getAttribute("list_by").equals("ad")) {
+            if (listBy.equals("ad")) {
                 out.print("<h2>Ads</h2>");
                 ArrayList<Ad> collection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
                 for (Ad ad : collection) {
@@ -46,7 +46,7 @@
             }
 
 
-            if (request.getSession().getAttribute("list_by").equals("employee")) {
+            if (listBy.equals("employee")) {
                 out.print("<h2>Employees</h2>");
                 ArrayList<DetailsEmployee> collection = (ArrayList<DetailsEmployee>) request.getSession().getAttribute("collection");
                 for (DetailsEmployee element : collection) {

@@ -10,7 +10,15 @@
 
 <div id="body" style="background: khaki">
 
-    <h1>HR's List</h1>
+    <%
+        if (request.getSession().getAttribute("list_by").equals("employee")) {
+            out.print("<h1>HR's List by Employee</h1>");
+        }
+
+        if (request.getSession().getAttribute("list_by").equals("ad")) {
+            out.print("<h1>HR's List by Ad</h1>");
+        }
+    %>
 
     <div>
         <a href="/Jobser_war2/base/announcement/list?list_by=ad">List by ad</a>
@@ -48,7 +56,7 @@
 
                 out.print("<h2>Applied Ads by " + employeeDetails.getFullName() + "</h2>");
                 int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());
-                out.print("<div>Count of selection: " + objectCount + "</div>");
+                out.print("<div>Count of selection: " + objectCount + "</div><hr>");
                 ArrayList<Ad> collection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
                 for (Ad ad : collection) {
                     int adId = ad.getId();
@@ -74,7 +82,6 @@
 
             if (adId > 0) {
 
-
                 Ad adDetails = (Ad) request.getSession().getAttribute(SessionKey.AD);
                 out.print("<h2>");
                 out.print("<div>ID: " + adDetails.getId() + "</div>");
@@ -84,10 +91,9 @@
                 out.print("</h2>");
                 out.print("<hr>");
 
-
                 out.print("<h2>Applied Employees for " + adDetails.getTitle() + " by " + adDetails.getEmployerName() + "</h2>");
                 int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());
-                out.print("<div>Count of selection: " + objectCount + "</div>");
+                out.print("<div>Count of selection: " + objectCount + "</div><hr>");
                 ArrayList<DetailsEmployee> collection = (ArrayList<DetailsEmployee>) request.getSession().getAttribute("collection");
                 for (DetailsEmployee employee : collection) {
                     int employeeId = employee.getUserId();
@@ -99,17 +105,8 @@
                     out.print("<div><a style=\"color: crimson\" href=\"/Jobser_war2/base/announcement/details_hr?employee_id=" + employee.getUserId() + "\">Details</a></div>");
                     out.print("<hr>");
                 }
-
             }
-
-
-
-
-
         }
-
-
-//        --------------------------------------------------
 
         int pageLimit = Integer.parseInt((request.getSession().getAttribute("page_limit")).toString());
         int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());

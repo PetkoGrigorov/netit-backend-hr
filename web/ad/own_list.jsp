@@ -15,7 +15,7 @@
 
     <%
         int adCount = Integer.parseInt ((request.getSession().getAttribute("object_count")).toString());
-        out.print("<div>Count of selection: " + adCount + "</div>");
+        out.print("<div>Count of selection: " + adCount + "</div><hr>");
         ArrayList<Ad> adCollection = (ArrayList<Ad>) request.getSession().getAttribute("collection");
         if (adCollection != null) {
 

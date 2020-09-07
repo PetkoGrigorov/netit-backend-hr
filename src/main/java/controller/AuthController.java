@@ -2,6 +2,7 @@ package controller;
 
 import config.PageMap;
 import config.RouteMap;
+import config.SessionKey;
 import framework.WebController;
 import framework.annotation.MVCRouteMethod;
 import framework.db.Database;
@@ -14,9 +15,6 @@ import model.system.Auth;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class AuthController extends WebController {
 
@@ -54,8 +52,9 @@ public class AuthController extends WebController {
         }
         if (userRole == 4) {
             authUserName = DetailsEmployee.fetchDetails(authUser.getId()).getFullName();
+            setSessionAttribute(req, SessionKey.EMPLOYEE_ID, authUser.getId());
         }
-        setSession(req,"auth_user", authUserName);
+        setSessionAttribute(req,"auth_user", authUserName);
         redirect(resp, RouteMap.ANNOUNCEMENT_LIST);
 
     }
@@ -79,7 +78,7 @@ public class AuthController extends WebController {
             return;
         }
         if (role.equals("3") || role.equals("4")) {
-            setSession(req, "role", role);
+            setSessionAttribute(req, "role", role);
             display(req, resp, PageMap.REGISTRATION_PAGE);
             return;
         }
@@ -99,7 +98,7 @@ public class AuthController extends WebController {
             this.registration(req, resp);
             return;
         }
-        int role = Integer.parseInt(getSession(req, "role").toString());
+        int role = Integer.parseInt(getSessionAttribute(req, "role").toString());
         if (!password.equals(passwordRepeat)) {
             req.setAttribute("message", "Passwords differ");
             this.registration(req, resp);
@@ -171,7 +170,7 @@ public class AuthController extends WebController {
             this.registration(req, resp);
             return;
         } else {
-            setSession(req,"auth_user", authUserName);
+            setSessionAttribute(req,"auth_user", authUserName);
 
         }
 

@@ -4,9 +4,7 @@ import config.PageMap;
 import config.SessionKey;
 import framework.WebController;
 import framework.annotation.MVCRouteMethod;
-import model.Ad;
 import model.Message;
-import model.system.Auth;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,29 +21,27 @@ public class MessageController extends WebController {
         System.out.println("Execute message/details");
         showRequestParam(req);
 
-        int messageId = getMessageId(req);
-        setSession(req, SessionKey.MESSAGE_ID, messageId);
+        int messageId = getMessageIdFromQueryOrSession(req);
+        setSessionAttribute(req, SessionKey.MESSAGE_ID, messageId);
 
         String messageCollectionSQL = "SELECT id, ad_id, employee_id, value" +
                 " FROM messages" +
                 " WHERE is_active=1" +
+                " AND ad_id=" + getSessionAttribute(req, SessionKey.AD_ID) +
+                " AND employee_id=" + getSessionAttribute(req, SessionKey.EMPLOYEE_ID) +
                 " AND id=" + messageId;
 
         ArrayList<Message> messageCollection = Message.fetchMessageSQL(messageCollectionSQL);
-        if (!messageCollection.isEmpty()) {
-            setSession(req, SessionKey.MESSAGE, messageCollection);
-        }
-
-
+//        if (!messageCollection.isEmpty()) {
+            setSessionAttribute(req, SessionKey.MESSAGE, messageCollection);
+//        }
 
         display(req, resp, PageMap.DETAILS_MESSAGE_PAGE);
     }
 
-    private int getMessageId(HttpServletRequest req) {
-        int messageId = 0;
-        if (getSession(req, SessionKey.MESSAGE_ID) != null) {
-            messageId = (int) getSession(req, SessionKey.MESSAGE_ID);
-        }
+    private int getMessageIdFromQueryOrSession(HttpServletRequest req) {
+        int messageId ;
+        messageId = (getSessionAttribute(req, SessionKey.MESSAGE_ID) != null) ? (int) getSessionAttribute(req, SessionKey.MESSAGE_ID) : 0;
         messageId = (hasQuery(req, SessionKey.MESSAGE_ID)) ? Integer.parseInt(getQueryValue(req, SessionKey.MESSAGE_ID)) : messageId;
         return messageId;
     }
