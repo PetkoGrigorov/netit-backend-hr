@@ -12,11 +12,11 @@
 
     <%
         if (request.getSession().getAttribute("list_by").equals("employee")) {
-            out.print("<h1>HR's List by Employee</h1>");
+            out.print("<h1>HR Employee Section</h1>");
         }
 
         if (request.getSession().getAttribute("list_by").equals("ad")) {
-            out.print("<h1>HR's List by Ad</h1>");
+            out.print("<h1>HR Ad Section</h1>");
         }
     %>
 

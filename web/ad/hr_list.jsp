@@ -9,7 +9,22 @@
 
 <div id="body" style="background: khaki">
 
-    <h1>HR's Dashboard</h1>
+
+
+    <%
+        if (request.getSession().getAttribute("list_by") == null) {
+            out.print("<h1>HR's Dashboard</h1>");
+        } else {
+            if (request.getSession().getAttribute("list_by").equals("employee")) {
+                out.print("<h1>HR's List by Employee</h1>");
+            } else if (request.getSession().getAttribute("list_by").equals("ad")) {
+                out.print("<h1>HR's List by Ad</h1>");
+            } else {
+                out.print("<h1>HR's Dashboard</h1>");
+            }
+        }
+
+    %>
 
     <div>
         <a href="/Jobser_war2/base/announcement/list?list_by=ad">List by ad</a>

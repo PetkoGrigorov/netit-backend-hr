@@ -5,6 +5,7 @@
 <%@ page import="model.Message" %>
 <%@ page import="model.DetailsEmployee" %>
 <%@ page import="framework.db.Database" %>
+<%@ page import="java.sql.ResultSet" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 
@@ -41,7 +42,8 @@
 
                 String query = "SELECT * FROM ad__employee WHERE is_active=1 AND ad_id=" + request.getSession().getAttribute(SessionKey.AD_ID) +
                         " AND user_id=" + request.getSession().getAttribute(SessionKey.EMPLOYEE_ID);
-                if (Database.getInstance().sqlQuery(query).printQueryBuilder().fetch() == null) {
+
+                if (request.getSession().getAttribute(SessionKey.STATUS) != null) {
 
                     out.print("<div style=\"color: green\">Status: " + request.getSession().getAttribute(SessionKey.STATUS) + "</div>");
                     out.print("<div style=\"color: crimson\">Update Status: </div>");
