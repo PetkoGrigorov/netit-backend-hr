@@ -13,6 +13,10 @@
         if (role.equals("4")) {
             out.print("<h1>Register Employee</h1>");
         }
+
+        if (role.equals("1")) {
+            out.print("<h1>Register Admin</h1>");
+        }
     %>
 
 
@@ -42,6 +46,16 @@ ${message}
             out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"town\" name=\"town\">");
             out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"education\" name=\"education\">");
         }
+
+            if (role.equals("1")) {
+                out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"full_name\" name=\"full_name\">");
+
+            }
+
+            if (role.equals("2")) {
+                out.print("<input class=\"input\" type=\"text\" style=\"display: block\" placeholder=\"full_name\" name=\"full_name\">");
+
+            }
 
         %>
 

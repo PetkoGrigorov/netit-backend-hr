@@ -95,6 +95,14 @@ public class AnnouncementController extends WebController {
     }
 
     @MVCRouteMethod(path = "/announcement/list", method = "GET")
+    @RoleAccess(role = 1)
+    public void listRole1(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute announcement/listRole1 redirect to admin page");
+        redirect(resp, PageMap.ADMIN_LIST_PAGE);
+
+    }
+
+    @MVCRouteMethod(path = "/announcement/list", method = "GET")
     @RoleAccess(role = 2)
     public void listRole2(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute announcement/listRole2");

@@ -110,6 +110,38 @@ public class WebController {
         return adId;
     }
 
+    protected int getAdminIdFromQueryOrSession(HttpServletRequest req) {
+//        int adminId;
+//        try {
+//            adminId = Integer.parseInt(getQueryValue(req, SessionKey.ADMIN_ID));
+//        } catch (Exception e) {
+//            try {
+//                adminId = Integer.parseInt(getSessionAttribute(req, SessionKey.ADMIN_ID) + "");
+//            } catch (Exception e1) {
+//                adminId = 0;
+//            }
+//        }
+//        return adminId;
+
+        return getAnyFromQueryOrSession(req, SessionKey.ADMIN_ID);
+    }
+
+    protected int getHRIdFromQueryOrSession(HttpServletRequest req) {
+//        int hrId;
+//        try {
+//            hrId = Integer.parseInt(getQueryValue(req, SessionKey.HR_ID));
+//        } catch (Exception e) {
+//            try {
+//                hrId = Integer.parseInt(getSessionAttribute(req, SessionKey.HR_ID) + "");
+//            } catch (Exception e1) {
+//                hrId = 0;
+//            }
+//        }
+//        return hrId;
+
+        return getAnyFromQueryOrSession(req, SessionKey.HR_ID);
+    }
+
     private int getEmployeeIdFromQuery(HttpServletRequest req) {
         int employeeId;
         try {
@@ -161,5 +193,18 @@ public class WebController {
             }
     }
 
+    private int getAnyFromQueryOrSession(HttpServletRequest req, String sessionKey) {
+        int id;
+        try {
+            id = Integer.parseInt(getQueryValue(req, sessionKey));
+        } catch (Exception e) {
+            try {
+                id = Integer.parseInt(getSessionAttribute(req, sessionKey) + "");
+            } catch (Exception e1) {
+                id = 0;
+            }
+        }
+        return id;
+    }
 
 }

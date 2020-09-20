@@ -113,16 +113,30 @@ public class DetailsEmployee {
     public static ArrayList<DetailsEmployee> fetchEmployeeDetailsSQL(String employeeCollectionSQL) {
         ResultSet resultSet = Database.getInstance().sqlQuery(employeeCollectionSQL)
                 .printQueryBuilder().fetch();
-        ArrayList<DetailsEmployee> adCollection = new ArrayList<>();
+        ArrayList<DetailsEmployee> employeeCollection = new ArrayList<>();
         while (true) {
             try {
                 if (!resultSet.next()) break;
-                adCollection.add(newEmployeeDetailsFromDB(resultSet));
+                employeeCollection.add(newEmployeeDetailsFromDB(resultSet));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return adCollection;
+        return employeeCollection;
+    }
+
+    public static void update(final int employeeId, final String updateName) {
+        String queryUpdateDetailsEmployeeSQL = "UPDATE details, users SET details.full_name='" + updateName + "'" +
+                " WHERE details.is_active=1 AND users.id=details.user_id AND users.role=4" +
+                " AND details.user_id=" + employeeId;
+        Database.getInstance().sqlQuery(queryUpdateDetailsEmployeeSQL).printQueryBuilder().execute();
+    }
+
+    public static void deleteSoft(int employeeId) {
+        String queryUpdateDetailsAndUsers = "UPDATE details, users SET details.is_active=0, users.is_active=0" +
+                " WHERE details.is_active=1 AND users.is_active=1 AND users.id=details.user_id AND users.role=4" +
+                " AND details.user_id=" + employeeId;
+        Database.getInstance().sqlQuery(queryUpdateDetailsAndUsers).printQueryBuilder().execute();
     }
 
 }

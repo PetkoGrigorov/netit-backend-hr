@@ -11,6 +11,7 @@ import model.DetailsEmployer;
 import model.DetailsHr;
 import model.User;
 import model.system.Auth;
+import model.system.DetailsAdmin;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +45,9 @@ public class AuthController extends WebController {
         User authUser = Auth.getAuthenticatedUser();
         String authUserName = null;
         int userRole = authUser.getRole();
+        if (userRole == 1) {
+            authUserName = "admin: " + DetailsHr.fetchDetails(authUser.getId()).getFullName();
+        }
         if (userRole == 2) {
             authUserName = "HR: " + DetailsHr.fetchDetails(authUser.getId()).getFullName();
         }
@@ -72,12 +76,14 @@ public class AuthController extends WebController {
 
         System.out.println("Execute auth/registration");
 
+        showRequestParam(req);
+
         String role = getQueryValue(req, "role");
         if (role == null) {
             redirect(resp, RouteMap.HOME);
             return;
         }
-        if (role.equals("3") || role.equals("4")) {
+        if (role.equals("3") || role.equals("4") || role.equals("1") || role.equals("2")) {
             setSessionAttribute(req, "role", role);
             display(req, resp, PageMap.REGISTRATION_PAGE);
             return;
@@ -88,6 +94,8 @@ public class AuthController extends WebController {
     @MVCRouteMethod(path="/auth/registration", method="POST")
     public void registrationProcess(HttpServletRequest req, HttpServletResponse resp) throws SQLException {
         System.out.println("Execute auth/registrationProcess");
+
+        showRequestParam(req);
 
         String username = req.getParameter("user_name");
         String password = req.getParameter("user_pass");
@@ -161,6 +169,54 @@ public class AuthController extends WebController {
 
             DetailsEmployee.create(lastInsertedId, fullName, age, town, education);
             authUserName = DetailsEmployee.fetchDetails(lastInsertedId).getFullName();
+        }
+
+        if (role == 1) {
+            String fullName = req.getParameter("full_name");
+
+            if (fullName.equals("")) {
+                req.setAttribute("message", "Invalid credentials");
+                this.registration(req, resp);
+                return;
+            }
+            if (User.isUnique("username", username) && User.isUnique("email", email)) {
+                User.create(username, password, email, role);
+            } else {
+                req.setAttribute("message", "Username or email exists in system");
+                this.registration(req, resp);
+                return;
+            }
+
+            int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
+            System.out.println("Last Inserted Id: " + lastInsertedId);
+            DetailsAdmin.create(lastInsertedId, fullName);
+
+            redirect(resp, RouteMap.ADMIN_ADMIN);
+            return;
+        }
+
+        if (role == 2) {
+            String fullName = req.getParameter("full_name");
+
+            if (fullName.equals("")) {
+                req.setAttribute("message", "Invalid credentials");
+                this.registration(req, resp);
+                return;
+            }
+            if (User.isUnique("username", username) && User.isUnique("email", email)) {
+                User.create(username, password, email, role);
+            } else {
+                req.setAttribute("message", "Username or email exists in system");
+                this.registration(req, resp);
+                return;
+            }
+
+            int lastInsertedId = (int) Database.getInstance().getLastInsertedId();
+            System.out.println("Last Inserted Id: " + lastInsertedId);
+            DetailsHr.create(lastInsertedId, fullName);
+
+            redirect(resp, RouteMap.ADMIN_HR);
+            return;
         }
 
         Auth.authenticateUser(username, password);
