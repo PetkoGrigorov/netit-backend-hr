@@ -125,12 +125,20 @@ public class DetailsEmployee {
         return employeeCollection;
     }
 
-    public static void update(final int employeeId, final String updateName) {
-        String queryUpdateDetailsEmployeeSQL = "UPDATE details, users SET details.full_name='" + updateName + "'" +
+    public static void updateComplex(final int employeeId, final String setColumnsWithValues) {
+        String queryUpdateDetailsEmployeeSQL = "UPDATE details, users " + setColumnsWithValues +
                 " WHERE details.is_active=1 AND users.id=details.user_id AND users.role=4" +
                 " AND details.user_id=" + employeeId;
+        System.out.println(queryUpdateDetailsEmployeeSQL);
         Database.getInstance().sqlQuery(queryUpdateDetailsEmployeeSQL).printQueryBuilder().execute();
     }
+
+//    public static void update(final int employeeId, final String updateName) {
+//        String queryUpdateDetailsEmployeeSQL = "UPDATE details, users SET details.full_name='" + updateName + "'" +
+//                " WHERE details.is_active=1 AND users.id=details.user_id AND users.role=4" +
+//                " AND details.user_id=" + employeeId;
+//        Database.getInstance().sqlQuery(queryUpdateDetailsEmployeeSQL).printQueryBuilder().execute();
+//    }
 
     public static void deleteSoft(int employeeId) {
         String queryUpdateDetailsAndUsers = "UPDATE details, users SET details.is_active=0, users.is_active=0" +

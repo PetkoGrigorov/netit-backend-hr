@@ -7,9 +7,9 @@ import framework.WebController;
 import framework.annotation.MVCRouteMethod;
 import framework.annotation.RoleAccess;
 import model.DetailsEmployee;
+import model.DetailsEmployer;
 import model.DetailsHr;
-import model.system.Auth;
-import model.system.DetailsAdmin;
+import model.DetailsAdmin;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -157,8 +157,67 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void employer(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/employer manage employer users");
+        String queryAllEmployerSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description FROM details, users " +
+                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=3";
+        ArrayList<DetailsEmployer> employerCollection = DetailsEmployer.fetchEmployerDetailsSQL(queryAllEmployerSQL);
+        setSessionAttribute(req, SessionKey.EMPLOYER_DETAILS, employerCollection);
+
         display(req, resp, PageMap.ADMIN_EMPLOYER_MANAGER_PAGE);
     }
+
+    @MVCRouteMethod(path = "/admin/employer", method = "POST")
+    @RoleAccess(role = 1)
+    public void employerPost(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute admin/employerPost manage employer users");
+        employer(req, resp);
+    }
+
+    @MVCRouteMethod(path = "/admin/employer_update", method = "GET")
+    @RoleAccess(role = 1)
+    public void employerUpdate(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute admin/employerUpdate manage admin users");
+        int employerId = getEmployerIdFromQueryOrSession(req);
+        setSessionAttribute(req, SessionKey.EMPLOYER_ID, employerId);
+        String queryEmployerSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description FROM details, users " +
+                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=3 " +
+                " AND users.id=" + employerId;
+
+        ArrayList<DetailsEmployer> employerCollection = DetailsEmployer.fetchEmployerDetailsSQL(queryEmployerSQL);
+        setSessionAttribute(req, SessionKey.EMPLOYER_DETAILS, employerCollection);
+        display(req, resp, PageMap.ADMIN_EMPLOYER_UPDATE_PAGE);
+    }
+
+    @MVCRouteMethod(path = "/admin/employer_update", method = "POST")
+    @RoleAccess(role = 1)
+    public void employerUpdateProcess(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute admin/employerUpdateProcess manage admin users");
+        String newName = req.getParameter("update_name");
+        String newBranch = req.getParameter("update_branch");
+        String newDescription = req.getParameter("update_description");
+
+        String setColumnsWithValues = "SET";
+
+        if (newName != null && !newName.equals("")) {
+            setColumnsWithValues += " details.company_name='" + newName + "',";
+        }
+        if (newBranch != null && !newBranch.equals("")) {
+            setColumnsWithValues += " details.branch='" + newBranch + "',";
+        }
+        if (newDescription != null && !newDescription.equals("")) {
+            setColumnsWithValues += " details.description='" + newDescription + "',";
+        }
+        if (!setColumnsWithValues.equals("SET")) {
+            setColumnsWithValues = setColumnsWithValues.substring(0, setColumnsWithValues.length()-1);
+            DetailsEmployer.updateComplex((int)getSessionAttribute(req, SessionKey.EMPLOYER_ID), setColumnsWithValues);
+        }
+
+//        DetailsEmployee.update((int)getSessionAttribute(req, SessionKey.EMPLOYEE_ID), newName);
+
+        display(req, resp, RouteMap.ADMIN_EMPLOYER);
+    }
+
+
+
 
 
     @MVCRouteMethod(path = "/admin/employee", method = "GET")
@@ -201,9 +260,31 @@ public class AdminController extends WebController {
     public void employeeUpdateProcess(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/employeeUpdateProcess manage admin users");
         String newName = req.getParameter("update_name");
+        String newAge = req.getParameter("update_age");
+        String newTown = req.getParameter("update_town");
+        String newEducation = req.getParameter("update_education");
+
+        String setColumnsWithValues = "SET";
+
         if (newName != null && !newName.equals("")) {
-            DetailsEmployee.update((int)getSessionAttribute(req, SessionKey.EMPLOYEE_ID), newName);
+            setColumnsWithValues += " details.full_name='" + newName + "',";
         }
+        if (newAge != null && !newAge.equals("")) {
+            setColumnsWithValues += " details.age=" + newAge + ",";
+        }
+        if (newTown != null && !newTown.equals("")) {
+            setColumnsWithValues += " details.town='" + newTown + "',";
+        }
+        if (newEducation != null && !newEducation.equals("")) {
+            setColumnsWithValues += " details.education='" + newEducation + "',";
+        }
+        if (!setColumnsWithValues.equals("SET")) {
+            setColumnsWithValues = setColumnsWithValues.substring(0, setColumnsWithValues.length()-1);
+            DetailsEmployee.updateComplex((int)getSessionAttribute(req, SessionKey.EMPLOYEE_ID), setColumnsWithValues);
+        }
+
+//        DetailsEmployee.update((int)getSessionAttribute(req, SessionKey.EMPLOYEE_ID), newName);
+
         display(req, resp, RouteMap.ADMIN_EMPLOYEE);
     }
 

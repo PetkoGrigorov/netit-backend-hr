@@ -1,7 +1,6 @@
 package model;
 
 import framework.db.Database;
-import model.system.DetailsAdmin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

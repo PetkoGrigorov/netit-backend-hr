@@ -11,6 +11,8 @@ public interface SessionKey {
     String HR = "hr";
     String EMPLOYEE_ID = "employee_id";
     String EMPLOYEE_DETAILS = "employee_details";
+    String EMPLOYER_ID = "employer_id";
+    String EMPLOYER_DETAILS = "employer_details";
     String STATUS = "status";
     String MESSAGE_ID = "message_id";
     String MESSAGE = "message";

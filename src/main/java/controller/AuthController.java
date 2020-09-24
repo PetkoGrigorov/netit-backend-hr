@@ -11,7 +11,7 @@ import model.DetailsEmployer;
 import model.DetailsHr;
 import model.User;
 import model.system.Auth;
-import model.system.DetailsAdmin;
+import model.DetailsAdmin;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

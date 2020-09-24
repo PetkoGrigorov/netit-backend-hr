@@ -1,5 +1,5 @@
 <%@ page import="config.SessionKey" %>
-<%@ page import="model.system.DetailsAdmin" %>
+<%@ page import="model.DetailsAdmin" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 

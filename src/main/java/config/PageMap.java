@@ -23,4 +23,5 @@ public interface PageMap {
     String ADMIN_ADMIN_UPDATE_PAGE = "/admin/admin_update.jsp";
     String ADMIN_HR_UPDATE_PAGE = "/admin/hr_update.jsp";
     String ADMIN_EMPLOYEE_UPDATE_PAGE = "/admin/employee_update.jsp";
+    String ADMIN_EMPLOYER_UPDATE_PAGE = "/admin/employer_update.jsp";
 }

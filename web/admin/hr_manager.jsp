@@ -1,6 +1,6 @@
 <%@ page import="model.DetailsHr" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="model.system.DetailsAdmin" %>
+<%@ page import="model.DetailsAdmin" %>
 <%@ page import="config.SessionKey" %>
 <%@ page import="model.system.Auth" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>

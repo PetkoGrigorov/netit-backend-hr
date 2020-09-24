@@ -23,6 +23,18 @@ public class DetailsEmployer {
         return userId;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public DetailsEmployer(int id, int userId, String companyName, String branch, String description) {
         this.id = id;
         this.userId = userId;
@@ -71,7 +83,7 @@ public class DetailsEmployer {
     }
 
     private static DetailsEmployer newEmployerDetailsFromDB(ResultSet resultSet) throws SQLException {
-        DetailsEmployer details =new DetailsEmployer(resultSet.getInt("id"),
+        DetailsEmployer details = new DetailsEmployer(resultSet.getInt("id"),
                 resultSet.getInt("user_id"),
                 resultSet.getString("company_name"),
                 resultSet.getString("branch"),
@@ -96,16 +108,23 @@ public class DetailsEmployer {
     public static ArrayList<DetailsEmployer> fetchEmployerDetailsSQL(String employerCollectionSQL) {
         ResultSet resultSet = Database.getInstance().sqlQuery(employerCollectionSQL)
                 .printQueryBuilder().fetch();
-        ArrayList<DetailsEmployer> adCollection = new ArrayList<>();
+        ArrayList<DetailsEmployer> employerCollection = new ArrayList<>();
         while (true) {
             try {
                 if (!resultSet.next()) break;
-                adCollection.add(newEmployerDetailsFromDB(resultSet));
+                employerCollection.add(newEmployerDetailsFromDB(resultSet));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return adCollection;
+        return employerCollection;
+    }
+
+    public static void updateComplex(final int employerId, final String setColumnsWithValues) {
+        String queryUpdateDetailsEmployerSQL = "UPDATE details, users " + setColumnsWithValues +
+                " WHERE details.is_active=1 AND users.id=details.user_id AND users.role=3" +
+                " AND details.user_id=" + employerId;
+        Database.getInstance().sqlQuery(queryUpdateDetailsEmployerSQL).printQueryBuilder().execute();
     }
 
 

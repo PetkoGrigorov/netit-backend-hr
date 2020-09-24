@@ -1,14 +1,10 @@
-package model.system;
+package model;
 
 import framework.db.Database;
-import model.DetailsHr;
-import model.User;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DetailsAdmin {
 

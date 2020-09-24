@@ -153,21 +153,23 @@ public class WebController {
     }
 
     protected int getEmployeeIdFromQueryOrSession(HttpServletRequest req) {
-        int employeeId;
+//        int employeeId;
+//
+//        try {
+//            employeeId = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
+//        } catch (Exception e) {
+//            try {
+//                employeeId = Integer.parseInt(getSessionAttribute(req, SessionKey.EMPLOYEE_ID) + "");
+//            } catch (Exception e1) {
+//                employeeId = 0;
+//            }
+//        }
+//        return employeeId;
+        return getAnyFromQueryOrSession(req, SessionKey.EMPLOYEE_ID);
+    }
 
-//        employeeId = (getSessionAttribute(req, SessionKey.EMPLOYEE_ID) != null) ? (int) getSessionAttribute(req, SessionKey.EMPLOYEE_ID) : 0;
-//        employeeId = (hasQuery(req, SessionKey.EMPLOYEE_ID)) ? getEmployeeIdFromQuery(req) : employeeId;
-
-        try {
-            employeeId = Integer.parseInt(getQueryValue(req, SessionKey.EMPLOYEE_ID));
-        } catch (Exception e) {
-            try {
-                employeeId = Integer.parseInt(getSessionAttribute(req, SessionKey.EMPLOYEE_ID) + "");
-            } catch (Exception e1) {
-                employeeId = 0;
-            }
-        }
-        return employeeId;
+    protected int getEmployerIdFromQueryOrSession(HttpServletRequest req) {
+        return getAnyFromQueryOrSession(req, SessionKey.EMPLOYER_ID);
     }
 
     protected boolean isIdBelongsToEmployee(HttpServletRequest req) {

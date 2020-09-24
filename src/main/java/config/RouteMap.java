@@ -8,4 +8,5 @@ public interface RouteMap {
     String ADMIN_ADMIN = "/base/admin/admin";
     String ADMIN_HR = "/base/admin/hr";
     String ADMIN_EMPLOYEE = "/base/admin/employee";
+    String ADMIN_EMPLOYER = "/base/admin/employer";
 }

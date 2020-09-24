@@ -1,4 +1,4 @@
-<%@ page import="model.system.DetailsAdmin" %>
+<%@ page import="model.DetailsAdmin" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="config.SessionKey" %>
 <%@ page import="model.system.Auth" %>
