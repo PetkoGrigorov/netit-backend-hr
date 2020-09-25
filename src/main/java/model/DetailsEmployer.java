@@ -15,6 +15,8 @@ public class DetailsEmployer {
     private String branch;
     private String description;
 
+
+
     public String getCompanyName() {
         return companyName;
     }
@@ -127,5 +129,30 @@ public class DetailsEmployer {
         Database.getInstance().sqlQuery(queryUpdateDetailsEmployerSQL).printQueryBuilder().execute();
     }
 
+//    ------------------------------
+
+    public static ArrayList<DetailsEmployer> fetchDetailsSQL(String employerCollectionSQL) {
+        ResultSet resultSet = Database.getInstance().sqlQuery(employerCollectionSQL)
+                .printQueryBuilder().fetch();
+        ArrayList<DetailsEmployer> employerCollection = new ArrayList<>();
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+                employerCollection.add(newEmployerDetailsFromDB(resultSet));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return employerCollection;
+    }
+
+    public static void deleteSoft(int employerId) {
+        String queryUpdateDetailsEmployerSQL = "UPDATE details, users SET details.is_active=0, users.is_active=0" +
+                " WHERE details.is_active=1 AND users.is_active=1 AND users.id=details.user_id AND users.role=3" +
+                " AND details.user_id=" + employerId;
+        Database.getInstance().sqlQuery(queryUpdateDetailsEmployerSQL).printQueryBuilder().execute();
+
+
+    }
 
 }

@@ -26,16 +26,18 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void admin(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/admin manage admin users");
-        String queryAllAdminSQL = "SELECT details.id, details.user_id, details.full_name FROM details, users " +
-                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=1 " +
-                "AND users.id<>24 "
-//                + "AND users.id<>" + Auth.getAuthenticatedUser().getId()
-                ;
+//        String queryAllAdminSQL = "SELECT details.id, details.user_id, details.full_name FROM details, users " +
+//                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=1 " +
+//                "AND users.id<>24 "
+////                + "AND users.id<>" + Auth.getAuthenticatedUser().getId()
+//                ;
+//
+//        ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryAllAdminSQL);
+//        setSessionAttribute(req, SessionKey.ADMIN, adminCollection);
+//
+//        display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
 
-        ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryAllAdminSQL);
-        setSessionAttribute(req, SessionKey.ADMIN, adminCollection);
-
-        display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
+        listUsersByRole(req, resp, 1);
     }
 
     @MVCRouteMethod(path = "/admin/admin_create", method = "GET")
@@ -108,12 +110,13 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void hr(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/hr manage HR users");
-        String queryAllHRSQL = "SELECT details.id, details.user_id, details.full_name FROM details, users " +
-                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=2";
-
-        ArrayList<DetailsHr> hrCollection = DetailsHr.fetchHRCollection(queryAllHRSQL);
-        setSessionAttribute(req, SessionKey.HR, hrCollection);
-        display(req, resp, PageMap.ADMIN_HR_MANAGER_PAGE);
+//        String queryAllHRSQL = "SELECT details.id, details.user_id, details.full_name FROM details, users " +
+//                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=2";
+//
+//        ArrayList<DetailsHr> hrCollection = DetailsHr.fetchHRCollection(queryAllHRSQL);
+//        setSessionAttribute(req, SessionKey.HR, hrCollection);
+//        display(req, resp, PageMap.ADMIN_HR_MANAGER_PAGE);
+        listUsersByRole(req, resp, 2);
     }
 
     @MVCRouteMethod(path = "/admin/hr_update", method = "GET")
@@ -157,12 +160,14 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void employer(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/employer manage employer users");
-        String queryAllEmployerSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description FROM details, users " +
-                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=3";
-        ArrayList<DetailsEmployer> employerCollection = DetailsEmployer.fetchEmployerDetailsSQL(queryAllEmployerSQL);
-        setSessionAttribute(req, SessionKey.EMPLOYER_DETAILS, employerCollection);
+//        String queryAllEmployerSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description FROM details, users " +
+//                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=3";
+//        ArrayList<DetailsEmployer> employerCollection = DetailsEmployer.fetchEmployerDetailsSQL(queryAllEmployerSQL);
+//        setSessionAttribute(req, SessionKey.EMPLOYER_DETAILS, employerCollection);
+//
+//        display(req, resp, PageMap.ADMIN_EMPLOYER_MANAGER_PAGE);
 
-        display(req, resp, PageMap.ADMIN_EMPLOYER_MANAGER_PAGE);
+        listUsersByRole(req, resp, 3);
     }
 
     @MVCRouteMethod(path = "/admin/employer", method = "POST")
@@ -216,7 +221,16 @@ public class AdminController extends WebController {
         display(req, resp, RouteMap.ADMIN_EMPLOYER);
     }
 
-
+    @MVCRouteMethod(path = "/admin/employer_delete", method = "GET")
+    @RoleAccess(role = 1)
+    public void employerDelete(HttpServletRequest req, HttpServletResponse resp) {
+        System.out.println("Execute admin/employerDelete manage admin users");
+        int employerId = getEmployerIdFromQueryOrSession(req);
+        setSessionAttribute(req, SessionKey.EMPLOYER_ID, employerId);
+        DetailsEmployer.deleteSoft(employerId);
+//        display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
+        redirect(resp, RouteMap.ADMIN_EMPLOYER);
+    }
 
 
 
@@ -224,13 +238,15 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void employee(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/employee manage employee users");
-        String queryAllEmployeeSQL = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education FROM details, users " +
-                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=4";
+//        String queryAllEmployeeSQL = "SELECT details.id, details.user_id, details.full_name, details.age, details.town, details.education FROM details, users " +
+//                "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=4";
+//
+//        ArrayList<DetailsEmployee> employeeCollection = DetailsEmployee.fetchEmployeeDetailsSQL(queryAllEmployeeSQL);
+//        setSessionAttribute(req, SessionKey.EMPLOYEE_DETAILS, employeeCollection);
+//
+//        display(req, resp, PageMap.ADMIN_EMPLOYEE_MANAGER_PAGE);
 
-        ArrayList<DetailsEmployee> employeeCollection = DetailsEmployee.fetchEmployeeDetailsSQL(queryAllEmployeeSQL);
-        setSessionAttribute(req, SessionKey.EMPLOYEE_DETAILS, employeeCollection);
-
-        display(req, resp, PageMap.ADMIN_EMPLOYEE_MANAGER_PAGE);
+        listUsersByRole(req, resp, 4);
     }
 
     @MVCRouteMethod(path = "/admin/employee", method = "POST")
@@ -299,11 +315,36 @@ public class AdminController extends WebController {
         redirect(resp, RouteMap.ADMIN_EMPLOYEE);
     }
 
-//    @MVCRouteMethod(path = "/admin/hr_delete", method = "POST")
-//    @RoleAccess(role = 1)
-//    public void employeeDeletePost(HttpServletRequest req, HttpServletResponse resp) {
-//        System.out.println("Execute admin/employeeDeletePost manage admin users");
-//        employeeDelete(req, resp);
-//    }
+    //    ------------------------------
+
+    public void listUsersByRole(HttpServletRequest req, HttpServletResponse resp, int role) {
+        System.out.println("Execute admin/listUsersByRole");
+        String queryUsersByRoleSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description, " +
+                " details.full_name, details.age, details.town, details.education FROM details, users " +
+                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=" + role;
+        String className = "";
+        switch (role) {
+            case 1 : ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryUsersByRoleSQL + " AND users.id<>24 ");
+                setSessionAttribute(req, SessionKey.ADMIN, adminCollection);
+                display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
+            break;
+            case 2 : ArrayList<DetailsHr> hrCollection = DetailsHr.fetchHRCollection(queryUsersByRoleSQL);
+                setSessionAttribute(req, SessionKey.HR, hrCollection);
+                display(req, resp, PageMap.ADMIN_HR_MANAGER_PAGE);
+            break;
+            case 3 : ArrayList<DetailsEmployer> employerCollection = DetailsEmployer.fetchDetailsSQL(queryUsersByRoleSQL);
+                setSessionAttribute(req, SessionKey.EMPLOYER_DETAILS, employerCollection);
+
+                display(req, resp, PageMap.ADMIN_EMPLOYER_MANAGER_PAGE);;
+                break;
+            case 4 : ArrayList<DetailsEmployee> employeeCollection = DetailsEmployee.fetchEmployeeDetailsSQL(queryUsersByRoleSQL);
+                setSessionAttribute(req, SessionKey.EMPLOYEE_DETAILS, employeeCollection);
+                display(req, resp, PageMap.ADMIN_EMPLOYEE_MANAGER_PAGE);
+                break;
+            default: display(req, resp, PageMap.PAGE_NOT_FOUND);
+        }
+
+
+    }
 
 }
