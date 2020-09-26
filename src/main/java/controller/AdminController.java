@@ -10,6 +10,7 @@ import model.DetailsEmployee;
 import model.DetailsEmployer;
 import model.DetailsHr;
 import model.DetailsAdmin;
+import model.system.Auth;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -88,9 +89,19 @@ public class AdminController extends WebController {
     @RoleAccess(role = 1)
     public void adminUpdateProcess(HttpServletRequest req, HttpServletResponse resp) {
         System.out.println("Execute admin/adminUpdateProcess manage admin users");
+
         String newName = req.getParameter("update_name");
         if (newName != null && !newName.equals("")) {
-            DetailsAdmin.update((int)getSessionAttribute(req, SessionKey.ADMIN_ID), newName);
+            int adminId = (int)getSessionAttribute(req, SessionKey.ADMIN_ID);
+            DetailsAdmin.update(adminId, newName);
+            if (adminId == Auth.getAuthenticatedUser().getId()) {
+                String queryAllAdminSQL = "SELECT details.id, details.user_id, details.full_name FROM details, users " +
+                        "WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=1 " +
+                        "AND users.id=" + adminId +
+                        " AND users.id<>24 ";
+                ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryAllAdminSQL);
+                setSessionAttribute(req,"auth_user", adminCollection.get(0).getFullName());
+            }
         }
         redirect(resp, RouteMap.ADMIN_ADMIN);
     }
@@ -231,8 +242,6 @@ public class AdminController extends WebController {
 //        display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
         redirect(resp, RouteMap.ADMIN_EMPLOYER);
     }
-
-
 
     @MVCRouteMethod(path = "/admin/employee", method = "GET")
     @RoleAccess(role = 1)
