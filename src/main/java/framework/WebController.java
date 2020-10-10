@@ -209,4 +209,35 @@ public class WebController {
         return id;
     }
 
+    protected int getPageIndex(HttpServletRequest req, int objectCount, int pageLimit) {
+        int pageIndex = 1;
+        if (getSessionAttribute(req, "page_index") != null) {
+            pageIndex = Integer.parseInt(getSessionAttribute(req, "page_index").toString());
+        }
+        pageIndex = (hasQuery(req, "page_index")) ? Integer.parseInt(getQueryValue(req, "page_index")) : pageIndex;
+        int numberOfPages = (int) Math.ceil(objectCount * 1.0 / pageLimit);
+        if (pageIndex > numberOfPages) {
+            pageIndex = numberOfPages;
+        }
+        if (pageIndex < 1) {
+            pageIndex = 1;
+        }
+        return pageIndex;
+    }
+
+    protected int getPageOffset(HttpServletRequest req, int adCount, int pageLimit) {
+        int pageIndex = getPageIndex(req, adCount, pageLimit);
+        int offset = (pageIndex - 1) * pageLimit;
+        return offset;
+    }
+
+    protected int getPageLimit(HttpServletRequest req) {
+        int pageLimit = 3;
+        if (getSessionAttribute(req, "page_limit") != null) {
+            pageLimit = Integer.parseInt(getSessionAttribute(req, "page_limit").toString());
+        }
+        pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req, "page_limit")) : pageLimit;
+        return pageLimit;
+    }
+
 }

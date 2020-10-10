@@ -36,18 +36,14 @@
 
 //        ---------------------------------------------------------------------
 
-        int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
+       /* int pageLimit = Integer.parseInt ((request.getSession().getAttribute("page_limit")).toString());
         int adCount = Integer.parseInt ((request.getSession().getAttribute("object_count")).toString());
         int pageIndex = Integer.parseInt ((request.getSession().getAttribute("page_index")).toString());
         int previousIndex = (pageIndex < 2) ? 1 : (pageIndex - 1);
         int nextIndex = pageIndex + 1;
-//        String searchString = "";
-//        if (session.getAttribute("search_string") != null) {
-//            searchString = session.getAttribute("search_string").toString();
-//        }
 
         if (pageIndex > 1) {
-            String previousPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + previousIndex + /*"&search_string=" + searchString + */"\">Previous page</a></div>";
+            String previousPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + previousIndex + "\">Previous page</a></div>";
             out.print(previousPage);
         } else {
             out.print("<div style=\"display: inline-block; width: 150px\"></div>");
@@ -59,7 +55,7 @@
             if (pageIndex == coefficient) {
                 color = "color: darkorange";
             }
-            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + /*"&search_string=" + searchString + */"\">" + coefficient + "</a></span>";
+            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + "\">" + coefficient + "</a></span>";
             out.print(forPageNumber);
             coefficient ++;
         }
@@ -68,23 +64,22 @@
             if (pageIndex == coefficient) {
                 color = "color: darkorange";
             }
-            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + /*"&search_string=" + searchString +*/ "\">" + coefficient + "</a></span>";
+            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"list?page_index=" + coefficient + "\">" + coefficient + "</a></span>";
             out.print(forPageNumber);
         }
 
         if ((pageIndex * pageLimit) < adCount) {
-            String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + nextIndex + /*"&search_string=" + searchString +*/ "\">Next page</a></div>";
+            String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"list?page_index=" + nextIndex + "\">Next page</a></div>";
             out.print(nextPage);
-        }
-
-
-
+        }*/
 
 //        ---------------------------------------------------------------------
 
     %>
 
-    <div></div>
+    <jsp:include page="../content/paging.jsp"></jsp:include>
+
+<%--    <div></div>
     <div >
         <div style="display: inline-block; width: 200px">Shown products on page:</div>
         <%
@@ -109,7 +104,7 @@
 
         %>
 
-    </div>
+    </div> --%>
 
 </div>
 

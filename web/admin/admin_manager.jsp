@@ -20,6 +20,9 @@
         <%
             ArrayList <DetailsAdmin> adminCollection = (ArrayList<DetailsAdmin>) request.getSession().getAttribute(SessionKey.ADMIN);
             if (adminCollection != null) {
+
+                out.print("<div>count: " + request.getSession().getAttribute(SessionKey.OBJECT_COUNT) + "</div>");
+
                 for (DetailsAdmin adminDetails : adminCollection) {
                     out.print("<h1>");
                     out.print("<div>ID: " + adminDetails.getUserId() + "</div>");
@@ -37,7 +40,7 @@
 
         %>
 
-
+    <jsp:include page="../content/paging.jsp"></jsp:include>
 
 
     <div><a href="/Jobser_war2/base/announcement/list">List</a></div>

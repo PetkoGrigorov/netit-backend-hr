@@ -21,4 +21,10 @@ public interface SessionKey {
     String AD_MESSAGE = "ad_message";
     String SEARCH_KEY = "search_key";
 
+    String PAGE_LIMIT = "page_limit";
+    String OBJECT_COUNT = "object_count";
+    String PAGE_INDEX = "page_index";
+
+
+
 }

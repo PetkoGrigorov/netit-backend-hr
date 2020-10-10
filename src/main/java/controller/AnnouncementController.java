@@ -432,16 +432,16 @@ public class AnnouncementController extends WebController {
         display(req, resp, PageMap.DETAILS_AD_PAGE);
     }
 
-    private int getPageLimit(HttpServletRequest req) {
+    /*private int getPageLimit(HttpServletRequest req) {
         int pageLimit = 3;
         if (getSessionAttribute(req, "page_limit") != null) {
             pageLimit = Integer.parseInt(getSessionAttribute(req, "page_limit").toString());
         }
         pageLimit = (hasQuery(req, "page_limit")) ? Integer.parseInt(getQueryValue(req, "page_limit")) : pageLimit;
         return pageLimit;
-    }
+    }*/
 
-    private int getPageIndex(HttpServletRequest req, int objectCount, int pageLimit) {
+    /*private int getPageIndex(HttpServletRequest req, int objectCount, int pageLimit) {
         int pageIndex = 1;
         if (getSessionAttribute(req, "page_index") != null) {
             pageIndex = Integer.parseInt(getSessionAttribute(req, "page_index").toString());
@@ -455,7 +455,7 @@ public class AnnouncementController extends WebController {
             pageIndex = 1;
         }
         return pageIndex;
-    }
+    }*/
 
 //    private String getSearchKey(HttpServletRequest req) {
 //        String searchKey;
@@ -481,11 +481,11 @@ public class AnnouncementController extends WebController {
 //        return adId;
 //    }
 
-    private int getPageOffset(HttpServletRequest req, int adCount, int pageLimit) {
+    /*private int getPageOffset(HttpServletRequest req, int adCount, int pageLimit) {
         int pageIndex = getPageIndex(req, adCount, pageLimit);
         int offset = (pageIndex - 1) * pageLimit;
         return offset;
-    }
+    }*/
 
     private void setCollectionInSession(HttpServletRequest req, Class classReference, String countSQL, String collectionSQL, String searchCondition) {
 

@@ -6,6 +6,7 @@ import config.SessionKey;
 import framework.WebController;
 import framework.annotation.MVCRouteMethod;
 import framework.annotation.RoleAccess;
+import framework.db.Database;
 import model.DetailsEmployee;
 import model.DetailsEmployer;
 import model.DetailsHr;
@@ -14,6 +15,7 @@ import model.system.Auth;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class AdminController extends WebController {
@@ -328,12 +330,34 @@ public class AdminController extends WebController {
 
     public void listUsersByRole(HttpServletRequest req, HttpServletResponse resp, int role) {
         System.out.println("Execute admin/listUsersByRole");
+
+        String countSQL = "SELECT COUNT(*) AS entry_count" +
+                " FROM details, users " +
+                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=" + role;
+        int objectCount = 0;
+        try {
+            objectCount = Database.getInstance().sqlQuery(countSQL).printQueryBuilder().fetch().getInt("entry_count");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        setSessionAttribute(req, SessionKey.OBJECT_COUNT, objectCount);
+        int pageLimit = getPageLimit(req);
+        setSessionAttribute(req, SessionKey.PAGE_LIMIT, pageLimit);
+        int pageIndex = getPageIndex(req, objectCount, pageLimit);
+        setSessionAttribute(req, SessionKey.PAGE_INDEX, pageIndex);
+        int pageOffset = getPageOffset(req,objectCount, pageLimit);
+
+
         String queryUsersByRoleSQL = "SELECT details.id, details.user_id, details.company_name, details.branch, details.description, " +
                 " details.full_name, details.age, details.town, details.education FROM details, users " +
-                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.role=" + role;
+                " WHERE users.is_active=1 AND details.is_active=1 AND details.user_id=users.id AND users.id<>24 AND users.role=" + role +
+                " LIMIT " + pageOffset + ", " + pageLimit;
+
+
+
         String className = "";
         switch (role) {
-            case 1 : ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryUsersByRoleSQL + " AND users.id<>24 ");
+            case 1 : ArrayList<DetailsAdmin> adminCollection = DetailsAdmin.fetchAdminCollection(queryUsersByRoleSQL/* + " AND users.id<>24 "*/);
                 setSessionAttribute(req, SessionKey.ADMIN, adminCollection);
                 display(req, resp, PageMap.ADMIN_ADMIN_MANAGER_PAGE);
             break;

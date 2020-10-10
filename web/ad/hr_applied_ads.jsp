@@ -108,7 +108,7 @@
             }
         }
 
-        int pageLimit = Integer.parseInt((request.getSession().getAttribute("page_limit")).toString());
+/*        int pageLimit = Integer.parseInt((request.getSession().getAttribute("page_limit")).toString());
         int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());
         int pageIndex = Integer.parseInt((request.getSession().getAttribute("page_index")).toString());
         int previousIndex = (pageIndex < 2) ? 1 : (pageIndex - 1);
@@ -127,7 +127,7 @@
             if (pageIndex == coefficient) {
                 color = "color: darkorange";
             }
-            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + /*"&search_string=" + searchString + */"\">" + coefficient + "</a></span>";
+            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + "\">" + coefficient + "</a></span>";
             out.print(forPageNumber);
             coefficient++;
         }
@@ -136,12 +136,12 @@
             if (pageIndex == coefficient) {
                 color = "color: darkorange";
             }
-            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + /*"&search_string=" + searchString +*/ "\">" + coefficient + "</a></span>";
+            String forPageNumber = "<span style=\"padding-left: 10px; padding-right: 10px\"><a style=\"" + color + "\" href=\"?page_index=" + coefficient + "\">" + coefficient + "</a></span>";
             out.print(forPageNumber);
         }
 
         if ((pageIndex * pageLimit) < objectCount) {
-            String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"?page_index=" + nextIndex + /*"&search_string=" + searchString +*/ "\">Next page</a></div>";
+            String nextPage = "<div style=\"display: inline-block; width: 150px\"><a href=\"?page_index=" + nextIndex + "\">Next page</a></div>";
             out.print(nextPage);
         }
 
@@ -181,10 +181,11 @@
         out.print("<span> </span>");
         out.print("<span><a style=\" padding-left: 5px " + color10 + "\"  href=\"?page_limit=10\">10</a></span>");
 
-        out.print("</div>");
-
+        out.print("</div>");*/
 
     %>
+
+    <jsp:include page="../content/paging.jsp"></jsp:include>
 
     <div></div>
 

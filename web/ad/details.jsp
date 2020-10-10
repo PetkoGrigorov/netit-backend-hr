@@ -40,9 +40,6 @@
                 out.print("<hr>");
 
 
-                String query = "SELECT * FROM ad__employee WHERE is_active=1 AND ad_id=" + request.getSession().getAttribute(SessionKey.AD_ID) +
-                        " AND user_id=" + request.getSession().getAttribute(SessionKey.EMPLOYEE_ID);
-
                 if (request.getSession().getAttribute(SessionKey.STATUS) != null) {
 
                     out.print("<div style=\"color: green\">Status: " + request.getSession().getAttribute(SessionKey.STATUS) + "</div>");
@@ -81,8 +78,6 @@
                 ArrayList<Message> messageArrayList = (ArrayList<Message>) request.getSession().getAttribute(SessionKey.MESSAGE);
                 if (!messageArrayList.isEmpty()) {
                     out.print("<div>Messages:</div>");
-//                    int objectCount = Integer.parseInt((request.getSession().getAttribute("object_count")).toString());
-//                    out.print("<div>Count of selection: " + objectCount + "</div> <hr>");
                     for (Message message : messageArrayList) {
                         out.print("<div>ID: " + message.getId() + "</div>");
                         out.print("<div>Value: <a href=\"/Jobser_war2/base/message/details?message_id=" + message.getId() + "\">" + message.getValue() + "</a></div>");
@@ -90,10 +85,6 @@
                     }
                 }
             }
-
-
-
-
         }
 
         if (authUserRole == 2) {
@@ -110,12 +101,7 @@
         }
 
 
-//           out.print("<a href=\"/Jobser_war2/base/announcement/list\">List</a>");
-
-
     %>
-
-<%-- <a href="/Jobser_war2/base/announcement/list">List</a> --%>
 
 </div>
 
